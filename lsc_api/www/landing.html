@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/assets/lsc_api/landing/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="LSC Website" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="author" content="Team" />
+    <title>LSC</title>
+    <style>
+      * {
+        forced-color-adjust: none;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/lsc_api/landing/assets/index-BHw6NeOW.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/lsc_api/landing/assets/index-8N759ck8.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      window.csrf_token = "{{ frappe.session.csrf_token }}";
+    </script>
+  </body>
+</html>
