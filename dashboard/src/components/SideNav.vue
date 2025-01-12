@@ -16,7 +16,7 @@
             class="w-full hover:bg-primary rounded-lg flex flex-row-reverse justify-between"
           >
             <img src="../assets/images/icons/home.svg" alt="" />
-            الرئيسية
+            {{ $t("Home") }}
           </RouterLink>
         </li>
         <li>
@@ -25,7 +25,7 @@
             class="w-full hover:bg-primary rounded-lg flex flex-row-reverse justify-between"
           >
             <img src="../assets/images/icons/services.svg" alt="" />
-            الخدمات
+            {{ $t("Services") }}
           </RouterLink>
         </li>
         <li>
@@ -34,16 +34,16 @@
             class="w-full hover:bg-primary rounded-lg flex flex-row-reverse justify-between"
           >
             <img src="../assets/images/icons/requests.svg" alt="" />
-            الطلبات
+            {{ $t("Requests") }}
           </RouterLink>
         </li>
-        <li>
+        <li v-if="!subscriptionStatus">
           <RouterLink
             to="/packages"
             class="w-full hover:bg-primary rounded-lg flex flex-row-reverse justify-between"
           >
             <font-awesome-icon icon="fa-solid fa-receipt" />
-            الباقات
+            {{ $t("Packages") }}
           </RouterLink>
         </li>
         <!-- <li
@@ -62,7 +62,7 @@
             class="w-full hover:bg-primary rounded-lg flex flex-row-reverse justify-between"
           >
             <font-awesome-icon icon="fa-solid fa-gears" />
-            الاعدادات
+            {{ $t("Settings") }}
           </RouterLink>
         </li>
         <li
@@ -73,7 +73,7 @@
             class="w-full flex flex-row-reverse justify-between"
           >
             <font-awesome-icon icon="fa-solid fa-arrow-right-from-bracket" />
-            تسجيل الخروج
+            {{ $t("Logout") }}
           </button>
         </li>
       </ul>
@@ -98,11 +98,16 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+import { useQueryClient } from "@tanstack/vue-query";
+const queryClient = useQueryClient();
+
 import Drawer from "../assets/images/icons/drawer.svg";
 import { useRouter, RouterLink } from "vue-router";
 import axios from "axios";
 import showToastMessage from "../router/toastmessage";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 // Toast Message
 const toastMessage = ref(null);
@@ -113,21 +118,41 @@ const closeModalClick = ref(null);
 
 async function handleLogOut() {
   loading.value = true;
-  closeModalClick.value.click();
   try {
     await axios.get("/api/method/logout", {
       withCredentials: true,
     });
     loading.value = false;
-    showToastMessage("جاري تسجيل الخروج...", toastMessage, showToast);
+    showToastMessage(t("Logging Out"), toastMessage, showToast);
     setTimeout(() => {
+      queryClient.clear();
+      localStorage.clear();
+      sessionStorage.clear();
       navigate.replace("/");
-    }, 1500);
+    }, 700);
   } catch (error) {
     loading.value = false;
-    showToastMessage("رجاء حاول مرة اخرى لاحقاً.", toastMessage, showToast);
+    showToastMessage(
+      t("An unexpected error occurred. Please try again later."),
+      toastMessage,
+      showToast
+    );
   }
 }
+const subscriptionStatus = ref(null);
+async function togglePackages() {
+  try {
+    const response = await axios.get(
+      "/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.get_subscription_status"
+    );
+    subscriptionStatus.value = response.data.message.data.subscription;
+  } catch (error) {
+    if (response.data.message.data.subscription == null) return;
+  }
+}
+onMounted(() => {
+  togglePackages();
+});
 </script>
 
 <style scoped>

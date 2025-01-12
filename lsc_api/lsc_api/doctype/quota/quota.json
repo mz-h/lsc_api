@@ -28,6 +28,7 @@
    "label": "Remaining Hrs"
   },
   {
+   "default": "0",
    "fieldname": "consumed_hrs",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -39,7 +40,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-05 16:28:24.837278",
+ "modified": "2024-12-01 18:47:05.734484",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Quota",

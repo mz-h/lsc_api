@@ -1,6 +1,7 @@
 <template>
-  <LoggedInTopNav title="إستعادة كلمة المرور" />
+  <LoggedInTopNav :title="t('Reset Password')" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="flex px-6 sm:px-20 items-center justify-center min-h-screenpx-6 py-40 bg-gray-100 rtl"
   >
     <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-md">
@@ -8,16 +9,16 @@
         <img :src="Logo" alt="LSC Logo" class="block w-full" />
       </div>
       <h2 class="mb-4 text-2xl font-bold text-center text-gray-700">
-        إستعادة كلمة المرور
+        {{ $t("Reset Password") }}
       </h2>
       <form @submit.prevent="handleReset" class="text-right">
         <!-- mobile_no Input -->
-        <div v-if="!sendCodeCheck" class="mb-4">
+        <div v-if="!sendCodeCheck" class="mb-4 countrycode">
           <label
             for="mobile_no"
             class="block mb-2 text-sm font-medium text-gray-600"
           >
-            رقم الهاتف
+            {{ $t("Phone Number") }}
             <!-- 966 5458921 -->
           </label>
           <div class="relative mt-2 rounded-md shadow-sm w-full">
@@ -26,7 +27,7 @@
               id="mobile_no"
               v-model="form.mobile_no"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="9665XXXXXXXX"
+              placeholder="512345678"
             />
           </div>
           <p v-if="errors.mobile_no" class="text-red-500 text-xs mt-2">
@@ -34,11 +35,11 @@
           </p>
           <div>
             <button
-              @click="() => sendCode(form.mobile_no)"
+              @click="() => checkNumber(form.mobile_no)"
               type="button"
-              class="btn btn-primary text-white w-full mt-4"
+              class="btn btn-primary text-white border-white bg-primary text-white w-full mt-4"
             >
-              إرسال رمز تأكيد
+              {{ $t("Send Code") }}
             </button>
           </div>
         </div>
@@ -49,13 +50,14 @@
             for="optCheck"
             class="block mb-2 text-sm font-medium text-gray-600"
           >
-            رمز التحقق
+            {{ $t("Check Code") }}
             <!-- XXXXXX -->
           </label>
           <div class="relative mt-2 rounded-md shadow-sm w-full">
             <input
               type="tel"
               id="optCheck"
+              maxlength="6"
               v-model="otp"
               class="input input-sm input-bordered w-full text-black"
               placeholder="XXXXXX"
@@ -65,9 +67,9 @@
             <button
               @click="() => checkOtp(form.mobile_no, String(otp))"
               type="button"
-              class="btn btn-primary text-white w-full mt-4"
+              class="btn btn-primary text-white border-white bg-primary text-white w-full mt-4"
             >
-              تحقق من الرمز
+              {{ $t("Check Code") }}
             </button>
           </div>
         </div>
@@ -78,14 +80,15 @@
             <label
               for="password"
               class="block mb-2 text-sm font-medium text-gray-600"
-              >كلمة المرور</label
             >
+              {{ $t("Enter Password") }}
+            </label>
             <input
               type="password"
               id="password"
               v-model="form.password"
               class="input input-bordered w-full text-black"
-              placeholder="أدخل كلمة المرور"
+              :placeholder="t('Enter Password')"
               autocomplete="current-password"
             />
             <!-- Error Message for Password -->
@@ -97,14 +100,15 @@
             <label
               for="repassword"
               class="block mb-2 text-sm font-medium text-gray-600"
-              >كلمة المرور</label
             >
+              {{ $t("Re Enter Password") }}
+            </label>
             <input
               type="password"
               id="repassword"
               v-model="repassword"
               class="input input-bordered w-full text-black"
-              placeholder="أدخل كلمة المرور"
+              :placeholder="t('Re Enter Password')"
               autocomplete="current-password"
             />
             <!-- Error Message for Password -->
@@ -119,23 +123,26 @@
           {{ errors.general }}
         </p>
 
-        <!-- Login Button -->
-        <div>
-          <button type="submit" class="btn btn-primary w-full text-white">
-            تسجيل الدخول
+        <!-- Save Password Button -->
+        <div v-if="sendCodeCheck && correctCode">
+          <button
+            type="submit"
+            class="btn btn-primary text-white border-white bg-primary w-full text-white"
+          >
+            {{ $t("Save Password") }}
           </button>
         </div>
       </form>
 
       <!-- Additional Links -->
       <div class="mt-6 text-center">
-        <a href="#" class="text-sm text-blue-600 hover:underline">
-          هل نسيت كلمة المرور؟
-        </a>
+        <RouterLink to="/" class="text-sm text-blue-600 hover:underline">
+          {{ $t("Login") }}
+        </RouterLink>
       </div>
       <div class="mt-2 text-center">
         <RouterLink to="/signup" class="text-sm text-blue-600 hover:underline">
-          لا تملك حساباً؟إنشاء حساب
+          {{ $t("Don't have an account? Create Account") }}
         </RouterLink>
       </div>
     </div>
@@ -160,6 +167,9 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
 import Logo from "../assets/images/icons/logo.png";
 import axios from "axios";
@@ -197,30 +207,26 @@ const sendCodeCheck = ref(false);
 const correctCode = ref(false);
 const repassword = ref("");
 
-async function sendCode(phone) {
-  // mobile_no validation for Egyptian and Saudi Arabia numbers
-  const saudimobile_noRegex = /^9665\d{8}$/;
+async function checkNumber(oldphone) {
+  let phone = `966${oldphone}`;
+  loading.value = true;
+  const saudimobile_noRegex = /^5\d{8}$/;
   if (!saudimobile_noRegex.test(form.value.mobile_no)) {
-    errors.value.mobile_no = "برجاء إدخال رقم هاتف سعودي.";
+    errors.value.mobile_no = t("Please enter a valid Saudi phone number.");
     sendCodeCheck.value = false;
   } else {
     loading.value = true;
-    const response = await axios.post(
-      "/api/method/lsc_api.lsc_api.sms_api.sms_api",
-      { phone_number: phone },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
+    const response = await axios.get(
+      "/api/method/lsc_api.lsc_api.forget_password.verify_mobile",
+      { params: { mobile_no: phone } }
     );
     loading.value = false;
     if (response.data.message.status == "success") {
+      sendCode(phone);
       sendCodeCheck.value = true;
     } else {
       showToastMessage(
-        ".برجاء التأكد من الرقم وإعادة المحاولة",
+        t("Please enter a valid phone number."),
         toastMessage,
         showToast
       );
@@ -228,16 +234,43 @@ async function sendCode(phone) {
   }
   loading.value = false;
 }
+
+async function sendCode(phone) {
+  // mobile_no validation for Saudi Arabia numbers
+  loading.value = true;
+  const response = await axios.post(
+    "/api/method/lsc_api.lsc_api.sms_api.sms_api",
+    { phone_number: phone, sms_type: "forget_password" },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    }
+  );
+  loading.value = false;
+  if (response.data.message.status == "success") {
+    sendCodeCheck.value = true;
+  } else {
+    showToastMessage(
+      t("Please enter a valid phone number."),
+      toastMessage,
+      showToast
+    );
+  }
+  loading.value = false;
+}
 const otp = ref("");
-async function checkOtp(phone, num) {
+async function checkOtp(oldphone, num) {
+  let phone = `966${oldphone}`;
   if (num.length != 6) {
-    showToastMessage("برجاء إدخال 6 أرقام.", toastMessage, showToast);
+    showToastMessage(t("Please write the 6 numbers"), toastMessage, showToast);
     return;
   }
   loading.value = true;
   const response = await axios.post(
     "/api/method/lsc_api.lsc_api.sms_api.validateOTP",
-    { data: { otp: num, phone_number: phone } },
+    { otp: num, phone_number: phone },
     {
       headers: {
         "Content-Type": "application/json",
@@ -249,11 +282,7 @@ async function checkOtp(phone, num) {
   if (response.data.message.status == "success") {
     correctCode.value = true;
   } else {
-    showToastMessage(
-      "الكود غير صحيح، الرجاء المحاولة مرةأخرى.",
-      toastMessage,
-      showToast
-    );
+    showToastMessage(t("Code is incorrect."), toastMessage, showToast);
   }
   loading.value = false;
 }
@@ -271,50 +300,61 @@ const errors = ref({
   mobile_no: "",
   general: "",
 });
+const router = useRouter();
 
 // Form Validation Function
 const validateForm = () => {
+  let isValid = true;
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  if (!passwordRegex.test(form.value.password)) {
-    errors.value.password =
-      "كلمة المرور يجب ان لا تقل عن 8 أحرف، ويجب أن تحتوي على أحرف كبيرة وصغيرة وأرقام ورموز.";
+    if (!passwordRegex.test(form.value.password)) {
+      isValid = false;
+      errors.value.repassword = t("Password is not secured") + "@$!%*?&";
+      return isValid;
+    }
+    
+    if (form.value.password !== repassword.value) {
+    errors.value.repassword = t("Passwords isn't matching.");
     isValid = false;
+    return isValid;
   }
-
-  if (form.value.password !== repassword.value) {
-    errors.value.repassword = "كلمات المرور غير متطابقة.";
-    isValid = false;
-  }
-  return !errors.password && !errors.repassword;
+  setTimeout(() => {
+    errors.value.password = "";
+    errors.value.repassword = "";
+  }, 2000);
+  return isValid;
 };
 
 // Handle Login
 const handleReset = async () => {
   if (!validateForm()) return;
+  form.value.mobile_no = `966${form.value.mobile_no}`;
   loading.value = true;
+  try {
+    const response = await axios.post(
+      "/api/method/lsc_api.lsc_api.forget_password.reset_password",
+      {
+        mobile_no: form.value.mobile_no,
+        new_password: form.value.password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      }
+    );
 
-  const formData = new FormData();
-  formData.append("mobile_no", form.mobile_no);
-  formData.append("new_password", form.password);
-
-  const response = await fetch(
-    "/api/method/lsc_api.lsc_api.update_user_data.update_user_data",
-    {
-      method: "PATCH",
-      body: formData, // Send the formData
-    }
-  );
-  const data = await response.json();
-  console.log(data)
-  loading.value = false;
-  if (response.data.message.status === "success") {
-    showToastMessage("تم التسجيل بنجاح!", toastMessage, showToast);
+    loading.value = false;
+    showToastMessage(t("Password Changed"), toastMessage, showToast);
     setTimeout(() => {
       router.replace("/");
-    }, 1500);
-  } else {
+    }, 500);
+  } catch {
     errors.value.general = "Failed. Please try again.";
+    loading.value = false;
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -324,8 +364,22 @@ input {
   background: #f0f0f0;
 }
 
-.rtl {
-  direction: rtl;
-  text-align: right;
+.countrycode {
+  position: relative;
+  width: 100%;
+  direction: ltr;
+}
+
+.countrycode input {
+  width: 100%;
+  padding-inline-start: 70px; /* Adjust padding as needed */
+}
+
+.countrycode::after {
+  content: "+966 ";
+  position: absolute;
+  top: 24%;
+  left: 10px;
+  color: black;
 }
 </style>

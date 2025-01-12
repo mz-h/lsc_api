@@ -1,27 +1,30 @@
 <template>
-  <LoggedInTopNav :title="servName" :backArrow="true" />
+  <LoggedInTopNav :title="servTitle" :backArrow="true" />
 
   <div
-    class="w-full h-screen flex items-center justify-center p-8 bg-gray-100 my-8 lg:my-24"
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="w-full h-screen flex items-center justify-center p-8 bg-gray-100 my-24"
   >
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <label class="form-control w-full text-black"> عنوان الاستشارة </label>
+        <label class="form-control w-full text-black">
+          {{ $t("Consultation Title") }}
+        </label>
         <input
           v-model="title"
           type="text"
-          placeholder="يرجى ادخال عنوان الاستشارة الخاص بك"
+          :placeholder="t('Consultation Title')"
           class="input input-bordered w-full"
         />
 
         <label
-          v-if="servName != 'استشارة كتابية'"
+          v-if="!servName.includes('كتابية') && !servName.includes('Written')"
           class="form-control w-full text-black"
         >
-          اختيار الوقت
+          {{ $t("Select Time") }}
         </label>
         <div
-          v-if="servName != 'استشارة كتابية'"
+          v-if="!servName.includes('كتابية') && !servName.includes('Written')"
           class="flex flex-col gap-2 w-full"
         >
           <VueDatePicker
@@ -32,7 +35,7 @@
             range-separator="-"
             prevent-min-max-navigation
             class="text-right"
-            placeholder="الوقت"
+            :placeholder="t('Select Time')"
             text-input
           />
           <ul id="timetable" class="grid w-full grid-cols-3 gap-2">
@@ -44,11 +47,17 @@
                 v-model="selectedSlot"
                 class="hidden peer"
                 name="timetable"
+                :disabled="isUnavailable(slot.fromTime)"
               />
               <label
                 :for="'slot-' + index"
                 style="direction: ltr"
-                class="inline-flex items-center justify-center w-full p-1 text-xs font-medium text-center hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 border rounded-lg cursor-pointer text-gray-500 border-gray-200 dark:border-gray-700 dark:peer-checked:border-primary peer-checked:border-primary dark:hover:border-gray-600 dark:peer-checked:text-white peer-checked:bg-primary peer-checked:text-white hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-primary bg-white"
+                :class="[
+                  'inline-flex items-center justify-center w-full p-1 text-[14px] font-medium text-center  hover:text-white  border rounded-lg cursor-pointer text-black border-gray-700 peer-checked:border-primary hover:border-gray-600 peer-checked:text-white peer-checked:bg-primary peer-checked:text-white hover:bg-gray-600 bg-white',
+                  isUnavailable(slot.fromTime)
+                    ? 'line-through !bg-red-800 hover:!bg-red-800 hover:!text-black'
+                    : '',
+                ]"
               >
                 {{ formatTime(slot.fromTime) }}
               </label>
@@ -62,11 +71,13 @@
         >
           {{ message }}
         </div>
-        <label class="form-control w-full text-black"> شرح مختصر </label>
+        <label class="form-control w-full text-black">
+          {{ $t("Description") }}
+        </label>
         <textarea
           v-model="case_description"
           class="textarea textarea-bordered bg-white h-24 w-full"
-          placeholder="تفاصيل الاستشارة"
+          :placeholder="t('Description')"
         ></textarea>
 
         <div class="flex items-center justify-center w-full bg-white">
@@ -81,10 +92,10 @@
               />
               <font-awesome-icon v-else icon="fa-solid fa-circle-check" />
               <span class="font-semibold">
-                {{ changeIcon ? "تم إرفاق الملف" : "اضغط هنا للإرفاق" }}
+                {{ changeIcon ? $t("File Attached") : $t("Attach File") }}
               </span>
               <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {{ changeIcon ? upFile : " صور أو ملفات أو وسائط" }}
+                {{ changeIcon ? upFile : $t("Images, Pdfs or Sounds") }}
               </p>
             </div>
             <input
@@ -97,22 +108,31 @@
           </label>
         </div>
 
-        <button type="submit" class="btn btn-primary w-full">إرسال</button>
+        <button
+          type="submit"
+          class="btn btn-primary text-white border-white bg-primary w-full"
+        >
+          {{ $t("Send") }}
+        </button>
       </form>
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import { ref, computed, watch } from "vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import Loader from "@/components/Loader.vue";
 import axios from "axios";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { addDays } from "date-fns";
+const router = useRouter();
 
 const minDate = computed(() => new Date());
 const maxDate = computed(() => addDays(new Date(), 15));
@@ -125,7 +145,7 @@ const handleFileChange = (event) => {
     upFile.value = file.name;
   }
 };
-const date = ref(new Date());
+const date = ref("");
 const loading = ref(false);
 const case_description = ref("");
 const title = ref("");
@@ -134,7 +154,9 @@ const message = ref("");
 const messageClass = ref("");
 const route = useRoute();
 const servName = route.query.elemnt || "";
+const servTitle = route.query.elementName || "";
 const availSlots = ref([]);
+const unAvailSlots = ref([]);
 const selectedSlot = ref(null);
 const formatTime = (time) => {
   const [hours, minutes] = time.split(":");
@@ -156,21 +178,32 @@ const convertDate = (date) => {
 
 const handleSubmit = () => {
   if (title.value.length < 5) {
-    message.value = "الرجاء إدخال العنوان (على الأقل 5 أحرف)";
+    message.value = t(
+      "Name is required and must be at least 5 characters long."
+    );
     messageClass.value = "bg-red-100 text-red-800 border border-red-300";
     return;
   }
   if (case_description.value.length < 5) {
-    message.value = "الرجاء إدخال التفاصيل (على الأقل 5 أحرف)";
+    message.value = t(
+      "Details are required and must be at least 5 characters long."
+    );
     messageClass.value = "bg-red-100 text-red-800 border border-red-300";
     return;
+  }
+  if (!servName.includes("كتابية") && !servName.includes("Written")) {
+    if (!selectedSlot.value) {
+      message.value = t("Date is required");
+      messageClass.value = "bg-red-100 text-red-800 border border-red-300";
+      return;
+    }
   }
   loading.value = true;
   const formData = new FormData();
   formData.append("consultation_name", servName);
   formData.append("title", title.value);
-  formData.append("date", convertDate(date.value));
   if (selectedSlot.value) {
+    formData.append("date", convertDate(date.value));
     formData.append("start_time", selectedSlot.value.fromTime);
     formData.append("end_time", selectedSlot.value.toTime);
   }
@@ -187,24 +220,38 @@ const handleSubmit = () => {
     .then((response) => {
       loading.value = false;
       const data = response.data;
-      if (data.message.status === "جديد") {
-        message.value = "تم الحجز بنجاح";
+      if (data.message.status === "جديد" || data.message.status === "New") {
+        message.value = t("Successfully Booked");
         messageClass.value =
           "bg-green-100 text-green-800 border border-green-300";
+        setTimeout(() => {
+          router.push({
+            path: `/requests/requestDetails/`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 500);
       } else {
-        message.value = "حدث خطأ اثناء الحجز";
+        message.value = t("An error occurred while booking");
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
       }
     })
     .catch((error) => {
       loading.value = false;
       messageClass.value = "bg-red-100 text-red-800 border border-red-300";
-      if (error.response.data.exception.includes("hours quota")) {
-        message.value = "رصيد الساعات المتبقية غير كافي.";
+      if (error.response.data.exception.includes("hours")) {
+        message.value = t("Remaining hour balance is insufficient.");
+        setTimeout(() => {
+          router.push({
+            path: `/packages`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 1500);
       } else if (error.response.data.exception.includes("expire_date")) {
-        message.value = "التوكيل المرفق غير صالح، برجاء مراجعة تاريخ التوكيل.";
+        message.value = t(
+          "The attached authorization is invalid, please check the authorization date."
+        );
       } else {
-        message.value = "حدث خطأ اثناء حجز الخدمة";
+        message.value = t("An error occurred while booking the service");
       }
     });
 };
@@ -216,10 +263,12 @@ watch(date, async (newDate) => {
         "/api/method/lsc_api.lsc_api.doctype.employee_appointment.employee_appointment.get_availability_data",
         {
           date: newDate,
+          item: servName,
         }
       );
       loading.value = false;
       message.value = "";
+
       availSlots.value = response.data.message.slot_details[0].avail_slot.map(
         (slot) => {
           return {
@@ -228,22 +277,54 @@ watch(date, async (newDate) => {
           };
         }
       );
+      unAvailSlots.value =
+        response.data.message.slot_details[0].appointments.map(
+          (appointment) => appointment.appointment_time
+        );
     } catch (error) {
       loading.value = false;
       if (error.response.data.exception.includes("holiday")) {
-        message.value = "هذا اليوم عطلة، برجاء اختيار يوم أخر.";
+        message.value = t("This is a Holiday, Select another day please");
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
         availSlots.value = [];
+        unAvailSlots.value = [];
+      } else if (error.response.data.exception.includes("No employees")) {
+        message.value = t("No Available Employes in this Day");
+        messageClass.value = "bg-red-100 text-red-800 border border-red-300";
+        availSlots.value = [];
+        unAvailSlots.value = [];
       } else {
-        message.value = "حدث خطأ اثناء اختيار اليوم، الرجاء المحاولة مرة أخرى.";
+        message.value = t(
+          "An error occurred while selecting the day, try again"
+        );
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
         availSlots.value = [];
+        unAvailSlots.value = [];
       }
     }
   } else {
     loading.value = false;
   }
 });
+
+function convertTimeToTodayDate(timeString) {
+  const [hours, minutes, seconds] = timeString.split(":").map(Number);
+  const today = new Date();
+  today.setHours(hours, minutes, seconds, 0);
+  return today;
+}
+
+function isUnavailable(fromTime) {
+  const currentTime = new Date();
+  if (date?.value?.getDate() == currentTime.getDate()) {
+    return (
+      unAvailSlots.value.includes(fromTime) ||
+      convertTimeToTodayDate(fromTime) < currentTime
+    );
+  } else {
+    return unAvailSlots.value.includes(fromTime);
+  }
+}
 </script>
 
 <style scoped>

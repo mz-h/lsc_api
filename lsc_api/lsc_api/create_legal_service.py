@@ -55,5 +55,7 @@ def create_legal_service(**kwargs):
 
     return {
         "status": "success",
+        "client_transaction": legal_service.client_transaction,
+        "creation": legal_service.creation,
         "type": legal_service.services_type,
     }

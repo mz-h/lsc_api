@@ -1,30 +1,34 @@
 <template>
   <div class="btm-nav bg-white lg:hidden">
-    <router-link
-      v-for="(navLink, index) in nav"
-      :key="index"
-      :to="`/${navLink.dir}`"
-    >
-      <img :src="navLink.img" :alt="navLink.title" />
-      <span>{{ navLink.title }}</span>
+    <router-link to="/home">
+      <img :src="homeIcon" :alt="t('Home')" />
+      <span>{{ $t("Home") }}</span>
+    </router-link>
+    <router-link to="/services">
+      <img :src="servicesIcon" :alt="t('Services')" />
+      <span>{{ $t("Services") }}</span>
+    </router-link>
+    <router-link to="/requests">
+      <img :src="requestsIcon" :alt="t('Requests')" />
+      <span>{{ $t("Requests") }}</span>
+    </router-link>
+    <router-link to="/profile">
+      <img :src="profileIcon" :alt="t('Profile')" />
+      <span>{{ $t("Profile") }}</span>
     </router-link>
   </div>
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import profileIcon from "../assets/images/icons/profile.svg";
 import homeIcon from "../assets/images/icons/home.svg";
 import requestsIcon from "../assets/images/icons/requests.svg";
 import servicesIcon from "../assets/images/icons/services.svg";
 import { ref } from "vue";
 import { RouterLink } from "vue-router";
-
-const nav = ref([
-  { dir: "home", img: homeIcon, title: "الرئيسية" },
-  { dir: "services", img: servicesIcon, title: "الخدمات" },
-  { dir: "requests", img: requestsIcon, title: "الطلبات" },
-  { dir: "profile", img: profileIcon, title: "حسابك" },
-]);
 </script>
 
 <style scoped>

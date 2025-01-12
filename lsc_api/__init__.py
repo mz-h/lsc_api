@@ -23,3 +23,16 @@ def fetch_notofications():
         'fetch_notofications',
         {'notifications': notifications},
     )
+    
+@frappe.whitelist(allow_guest=True)
+def get_user_lang(user: str | None = None) -> str:
+	"""Set frappe.local.lang from user preferences on session beginning or resumption"""
+	user = user or frappe.session.user
+
+	# User.language => Session Defaults => frappe.local.lang => 'en'
+	return (
+		frappe.get_cached_value("User", user, "language")
+		or frappe.db.get_default("lang")
+		or frappe.local.lang
+		or "en"
+	)

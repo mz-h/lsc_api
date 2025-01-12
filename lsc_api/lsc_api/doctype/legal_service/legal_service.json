@@ -9,10 +9,12 @@
   "client_transaction",
   "client_transaction_status",
   "client",
+  "branch",
   "status",
   "services_type",
   "description",
-  "attachements"
+  "attachements",
+  "use_ai"
  ],
  "fields": [
   {
@@ -45,7 +47,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\u062c\u062f\u064a\u062f\n\u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630\n\u0645\u0646\u062a\u0647\u064a"
+   "options": "\u062c\u062f\u064a\u062f\n\u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630\n\u062a\u0645 \u0627\u0644\u062a\u0646\u0641\u064a\u0630\n\u0631\u0641\u0636\u062a"
   },
   {
    "fieldname": "services_type",
@@ -72,11 +74,26 @@
    "in_standard_filter": 1,
    "label": "Client Transaction Status",
    "link_filters": "[[\"Client Transactions\",\"creation\",\"Timespan\",\"today\"]]"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_ai",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Use AI"
+  },
+  {
+   "fetch_from": "client.custom_branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 00:08:32.988069",
+ "modified": "2024-12-29 18:12:55.436707",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Legal Service",
@@ -92,6 +109,7 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
    "share": 1,
    "write": 1
   }

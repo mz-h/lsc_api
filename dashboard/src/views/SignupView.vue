@@ -1,6 +1,7 @@
 <template>
-  <LoggedInTopNav title="التسجيل" />
+  <LoggedInTopNav :title="t('Registration')" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="flex items-center justify-center min-h-screen px-6 sm:px-20 py-40 bg-gray-100"
   >
     <div class="w-full max-w-lg p-6 bg-white rounded-lg shadow-md">
@@ -8,7 +9,7 @@
         <img :src="Logo" alt="LSC Logo" class="block w-full" />
       </div>
       <h2 class="mb-4 text-2xl font-bold text-center text-gray-700">
-        إنشاء حساب
+        {{ $t("Create Account") }}
       </h2>
       <form @submit.prevent="handleSubmit" class="text-right w-full h-auto">
         <!-- Branch select -->
@@ -17,27 +18,30 @@
             for="firstname"
             class="block mb-2 text-sm font-medium text-gray-600"
           >
-            حدد مدينة الاستفادة من الخدمات
+            {{ $t("Select the city to benefit from services") }}
           </label>
           <select
             v-model="form.branch"
             class="h-full w-full rounded-md border-2 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
             style="direction: ltr"
           >
-            <option v-for="branch in branchs" :key="branch" :value="branch">
-              {{ branch }}
+            <option
+              v-for="branch in branchs"
+              :key="branch"
+              :value="branch.name"
+            >
+              {{ branch.branch_name }}
             </option>
           </select>
         </div>
 
         <!-- mobile_no Input -->
-        <div v-if="form.branch && !sendCodeCheck" class="mb-4">
+        <div v-if="form.branch && !waitCode" class="mb-4 countrycode">
           <label
             for="mobile_no"
             class="block mb-2 text-sm font-medium text-gray-600"
           >
-            رقم الهاتف
-            <!-- 966 5458921 -->
+            {{ $t("Phone Number") }}
           </label>
           <div class="relative mt-2 rounded-md shadow-sm w-full">
             <input
@@ -45,7 +49,8 @@
               id="mobile_no"
               v-model="form.mobile_no"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="9665XXXXXXXX"
+              placeholder="512345678"
+              maxlength="9"
             />
           </div>
           <p v-if="errors.mobile_no" class="text-red-500 text-xs mt-2">
@@ -53,22 +58,25 @@
           </p>
           <div v-if="form.branch">
             <button
-              @click="() => sendCode(form.mobile_no)"
+              @click="() => checkNumber(form.mobile_no)"
               type="button"
-              class="btn btn-primary text-white w-full mt-4"
+              class="btn btn-primary text-white border-white bg-primary text-white w-full mt-4"
             >
-              إرسال رمز تأكيد
+              {{ $t("Send Code") }}
             </button>
           </div>
         </div>
 
         <!-- Code Checker Input -->
-        <div v-if="form.branch && sendCodeCheck && !correctCode" class="mb-4">
+        <div
+          v-if="form.branch && sendCodeCheck && waitCode && !correctCode"
+          class="mb-4"
+        >
           <label
             for="optCheck"
             class="block mb-2 text-sm font-medium text-gray-600"
           >
-            رمز التحقق
+            {{ $t("Check Code") }}
             <!-- XXXXXX -->
           </label>
           <div class="relative mt-2 rounded-md shadow-sm w-full">
@@ -84,9 +92,9 @@
             <button
               @click="() => checkOtp(form.mobile_no, String(otp))"
               type="button"
-              class="btn btn-primary text-white w-full mt-4"
+              class="btn btn-primary text-white border-white bg-primary text-white w-full mt-4"
             >
-              تحقق من الرمز
+              {{ $t("Check Code") }}
             </button>
           </div>
         </div>
@@ -98,37 +106,37 @@
               for="firstname"
               class="block mb-2 text-sm font-medium text-gray-600"
             >
-              اسمك الأول
+              {{ $t("First Name") }}
             </label>
             <input
               type="text"
               id="firstname"
               v-model="form.first_name"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="الاسم الاول"
+              :placeholder="t('First Name')"
             />
             <p v-if="errors.first_name" class="text-red-500 text-xs mt-2">
               {{ errors.first_name }}
             </p>
           </div>
 
-          <!-- Username Input -->
+          <!-- National ID Input -->
           <div class="mb-4">
             <label
-              for="username"
+              for="national_id"
               class="block mb-2 text-sm font-medium text-gray-600"
             >
-              اسم المستخدم
+              {{ $t("ID Number") }}
             </label>
             <input
               type="text"
-              id="username"
-              v-model="form.username"
+              id="national_id"
+              v-model="form.national_id"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="اسم المستخدم"
+              :placeholder="t('Enter ID Number')"
             />
-            <p v-if="errors.username" class="text-red-500 text-xs mt-2">
-              {{ errors.username }}
+            <p v-if="errors.national_id" class="text-red-500 text-xs mt-2">
+              {{ errors.national_id }}
             </p>
           </div>
 
@@ -138,14 +146,14 @@
               for="password"
               class="block mb-2 text-sm font-medium text-gray-600"
             >
-              كلمة المرور
+              {{ $t("Password") }}
             </label>
             <input
               type="password"
               id="password"
               v-model="form.password"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="كلمة المرور"
+              :placeholder="t('Enter Password')"
             />
             <p v-if="errors.password" class="text-red-500 text-xs mt-2">
               {{ errors.password }}
@@ -158,14 +166,14 @@
               for="repassword"
               class="block mb-2 text-sm font-medium text-gray-600"
             >
-              تأكيد كلمة المرور
+              {{ $t("Re Enter Password") }}
             </label>
             <input
               type="password"
               id="repassword"
-              v-model="repassword"
+              v-model="form.repassword"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="تأكيد كلمة المرور"
+              :placeholder="t('Re Enter Password')"
             />
             <p v-if="errors.repassword" class="text-red-500 text-xs mt-2">
               {{ errors.repassword }}
@@ -178,37 +186,17 @@
               for="email"
               class="block mb-2 text-sm font-medium text-gray-600"
             >
-              البريد الإلكتروني
+              {{ $t("Enter Your Email") }}
             </label>
             <input
               type="email"
               id="email"
               v-model="form.email"
               class="input input-sm input-bordered w-full text-black"
-              placeholder="أدخل بريدك الإلكتروني"
+              :placeholder="t('Enter Your Email')"
             />
             <p v-if="errors.email" class="text-red-500 text-xs mt-2">
               {{ errors.email }}
-            </p>
-          </div>
-
-          <!-- National ID Input -->
-          <div class="mb-4">
-            <label
-              for="national_id"
-              class="block mb-2 text-sm font-medium text-gray-600"
-            >
-              رقم الهوية
-            </label>
-            <input
-              type="text"
-              id="national_id"
-              v-model="form.national_id"
-              class="input input-sm input-bordered w-full text-black"
-              placeholder="أدخل رقم الهوية"
-            />
-            <p v-if="errors.national_id" class="text-red-500 text-xs mt-2">
-              {{ errors.national_id }}
             </p>
           </div>
         </div>
@@ -220,24 +208,28 @@
 
         <!-- Signup Button -->
         <div v-if="form.branch && sendCodeCheck && correctCode">
-          <button type="submit" class="btn btn-primary text-white w-full">
-            إنشاء حساب
+          <button
+            type="submit"
+            class="btn btn-primary text-white border-white bg-primary text-white w-full"
+          >
+            {{ $t("Create Account") }}
           </button>
         </div>
       </form>
 
       <!-- Additional Links -->
       <div class="mt-6 text-center flex flex-col justify-center gap-2">
+        <!-- href="https://portal.lsc-sa.net/" -->
         <a
           v-if="!form.branch"
-          href="https://lsc.psc-s.com/"
+          href="#"
           class="text-sm text-blue-600 hover:underline"
         >
-          لم تجد مدينتك؟ سجل ليصلك تحديثات الفروع.
+          {{ $t("Can't find your city? Register to receive branch updates.") }}
         </a>
 
         <RouterLink to="/" class="text-sm text-blue-600 hover:underline">
-          تسجيل الدخول؟
+          {{ $t("Login?") }}
         </RouterLink>
       </div>
     </div>
@@ -251,17 +243,16 @@
     </div>
   </div>
   <!-- Loading? -->
-  <div
-    v-if="loading"
-    class="loader absolute z-20 flex bg-gray-200 bg-opacity-40 justify-center items-center w-screen h-screen left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-  >
-    <span class="loading text-primary loading-ring loading-lg"></span>
-  </div>
+  <Loader v-if="loading" />
+
   <!-- END LOADING -->
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+import Loader from "@/components/Loader.vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import Logo from "../assets/images/icons/logo.png";
@@ -287,57 +278,89 @@ fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .catch((error) => {});
 
 onMounted(() => {
+  if (localStorage.getItem("language")) {
+    locale.value = localStorage.getItem("language");
+  } else {
+    locale.value = "ar";
+  }
   getBranchs();
 });
 // Toast Message
 const toastMessage = ref(null);
 const showToast = ref(false);
 const loading = ref(false);
+const waitCode = ref(false);
 const sendCodeCheck = ref(false);
 const correctCode = ref(false);
 const repassword = ref("");
 
-async function sendCode(phone) {
-  // mobile_no validation for Egyptian and Saudi Arabia numbers
-  const saudimobile_noRegex = /^9665\d{8}$/;
+async function checkNumber(oldphone) {
+  loading.value = true;
+  const saudimobile_noRegex = /^5\d{8}$/;
   if (!saudimobile_noRegex.test(form.value.mobile_no)) {
-    errors.value.mobile_no = "برجاء إدخال رقم هاتف سعودي.";
+    errors.value.mobile_no = t("Please enter a valid Saudi phone number.");
     sendCodeCheck.value = false;
   } else {
+    let phone = `966${oldphone}`;
     loading.value = true;
-    const response = await axios.post(
-      "/api/method/lsc_api.lsc_api.sms_api.sms_api",
-      { phone_number: phone },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
+    const response = await axios.get(
+      "/api/method/lsc_api.lsc_api.forget_password.verify_mobile",
+      { params: { mobile_no: phone } }
     );
     loading.value = false;
     if (response.data.message.status == "success") {
-      sendCodeCheck.value = true;
-    } else {
       showToastMessage(
-        ".برجاء التأكد من الرقم وإعادة المحاولة",
+        t("Phone Number is used before"),
         toastMessage,
         showToast
       );
+    } else {
+      sendCode(phone);
+      sendCodeCheck.value = true;
     }
   }
   loading.value = false;
 }
+
+async function sendCode(phone) {
+  // mobile_no validation for Saudi Arabia numbers
+  loading.value = true;
+  const response = await axios.post(
+    "/api/method/lsc_api.lsc_api.sms_api.sms_api",
+    { phone_number: phone, sms_type: "create_account" },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      withCredentials: true,
+    }
+  );
+  loading.value = false;
+  if (response.data.message.status == "success") {
+    sendCodeCheck.value = true;
+    waitCode.value = true;
+  } else {
+    showToastMessage(
+      t("Please enter a valid phone number."),
+      toastMessage,
+      showToast
+    );
+    waitCode.value = false;
+  }
+  loading.value = false;
+}
+
 const otp = ref("");
-async function checkOtp(phone, num) {
+async function checkOtp(oldphone, num) {
+  let phone = `966${oldphone}`;
   if (num.length != 6) {
-    showToastMessage("برجاء إدخال 6 أرقام.", toastMessage, showToast);
+    showToastMessage(t("Please write the 6 numbers"), toastMessage, showToast);
     return;
   }
   loading.value = true;
   const response = await axios.post(
     "/api/method/lsc_api.lsc_api.sms_api.validateOTP",
-    { data: { otp: num, phone_number: phone } },
+    { otp: num, phone_number: phone },
     {
       headers: {
         "Content-Type": "application/json",
@@ -349,11 +372,7 @@ async function checkOtp(phone, num) {
   if (response.data.message.status == "success") {
     correctCode.value = true;
   } else {
-    showToastMessage(
-      "الكود غير صحيح، الرجاء المحاولة مرةأخرى.",
-      toastMessage,
-      showToast
-    );
+    showToastMessage(t("Code is incorrect."), toastMessage, showToast);
   }
   loading.value = false;
 }
@@ -362,13 +381,12 @@ const branchs = ref([]);
 async function getBranchs() {
   try {
     const response = await fetch(
-      "/api/method/lsc_api.lsc_api.get_linked_data.get_branches"
+      `/api/method/lsc_api.lsc_api.get_linked_data.get_branches?lang=${
+        locale.value || "ar"
+      }`
     );
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
     const data = await response.json();
-    branchs.value = data.message.branches;
+    branchs.value = data?.message?.branches;
   } catch (error) {
     console.error("Error fetching user data:", error);
   }
@@ -376,17 +394,17 @@ async function getBranchs() {
 // Form fields
 const form = ref({
   branch: "",
-  username: "",
   first_name: "",
   password: "",
+  repassword: "",
   email: "",
   mobile_no: "",
   national_id: "",
+  username: "",
 });
 
 // Error state for form fields
 const errors = ref({
-  username: "",
   first_name: "",
   password: "",
   repassword: "",
@@ -396,12 +414,17 @@ const errors = ref({
   general: "",
 });
 
+watch(
+  () => form.value.national_id,
+  (newValue) => {
+    form.value.username = newValue; // Update username whenever national_id changes
+  }
+);
 const router = useRouter();
 
 // Utility function to validate form inputs
 const validateForm = () => {
   let isValid = true;
-
   // Clear previous errors
   Object.keys(errors.value).forEach((key) => {
     errors.value[key] = "";
@@ -410,7 +433,7 @@ const validateForm = () => {
   // All fields are required
   for (const [key, value] of Object.entries(form.value)) {
     if (!value.trim()) {
-      errors.value[key] = `هذا الحقل مطلوب.`;
+      errors.value[key] = t("This field is required.");
       isValid = false;
     }
   }
@@ -419,33 +442,34 @@ const validateForm = () => {
   const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   if (!passwordRegex.test(form.value.password)) {
-    errors.value.password =
-      "كلمة المرور يجب ان لا تقل عن 8 أحرف، ويجب أن تحتوي على أحرف كبيرة وصغيرة وأرقام ورموز.";
+    errors.value.password = t(
+      "Password must be at least 8 characters long and include uppercase and lowercase letters, numbers, and symbols."
+    ) + "@$!%*?&";
     isValid = false;
   }
 
-  if (form.value.password !== repassword.value) {
-    errors.value.repassword = "كلمات المرور غير متطابقة.";
+  if (form.value.password !== form.value.repassword) {
+    errors.value.repassword = t("Passwords isn't matching.");
     isValid = false;
   }
   // Email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(form.value.email)) {
-    errors.value.email = "برجاء ادخال إيميل صحيح.";
+    errors.value.email = t("Please enter a valid email.");
     isValid = false;
   }
 
   // mobile_no validation for Egyptian and Saudi Arabia numbers
-  const saudimobile_noRegex = /^9665\d{8}$/;
+  const saudimobile_noRegex = /^(9665\d{8}|5\d{8})$/;
   if (!saudimobile_noRegex.test(form.value.mobile_no)) {
-    errors.value.mobile_no = "برجاء إدخال رقم هاتف سعودي.";
+    errors.value.mobile_no = t("Please enter a valid Saudi phone number.");
     isValid = false;
   }
 
   // National ID validation (assuming it follows a similar pattern as the mobile_no)
   const saudiNationalIdRegex = /^(1|2)\d{9}$/;
   if (!saudiNationalIdRegex.test(form.value.national_id)) {
-    errors.value.national_id = "برجاء إدخال رقم هوية سعودية.";
+    errors.value.national_id = t("Please enter a valid Saudi ID number.");
     isValid = false;
   }
 
@@ -460,6 +484,9 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
+    if (!form.value.mobile_no.startsWith("966")) {
+      form.value.mobile_no = `966${form.value.mobile_no}`;
+    }
     const response = await axios.post(
       "/api/method/lsc_api.lsc_api.register.register",
       { data: form.value },
@@ -472,10 +499,10 @@ const handleSubmit = async () => {
     );
     loading.value = false;
     if (response.data.message.status === "success") {
-      showToastMessage("تم التسجيل بنجاح!", toastMessage, showToast);
+      showToastMessage(t("Registered Successfully!"), toastMessage, showToast);
       setTimeout(() => {
         router.replace("/");
-      }, 1500);
+      }, 500);
     } else {
       errors.value.general = "Registration failed. Please try again.";
     }
@@ -483,37 +510,40 @@ const handleSubmit = async () => {
     loading.value = false;
     if (error.response) {
       // Handle specific error from the server
-      if (error.response.data.message.message.includes("username")) {
+      if (error.response.data.message.message.includes("mobile_no")) {
         showToastMessage(
-          "الاسم مستخدم مسبقاً، من فضلك اختار اسم مختلف.",
+          t("The number is already in use, please choose a different number."),
           toastMessage,
           showToast
         );
-        errors.value.username =
-          "Username already exists. Please choose another.";
-      } else if (error.response.data.message.message.includes("mobile_no")) {
-        showToastMessage(
-          "الرقم مستخدم مسبقاً، من فضلك اختار رقم مختلف.",
-          toastMessage,
-          showToast
+        errors.value.mobile_no = t(
+          "The number is already in use, please choose a different number."
         );
-        errors.value.mobile_no = "mobile_no Already Exist";
       } else if (error.response.data.message.message.includes("email")) {
-        errors.value.email = "Email Already Exist";
+        errors.value.email = t(
+          "The email is already in use, please choose a different email."
+        );
         showToastMessage(
-          "الايميل مستخدم مسبقاً، من فضلك اختار ايميل مختلف.",
+          t("The email is already in use, please choose a different email."),
+          toastMessage,
+          showToast
+        );
+      } else if (error.response.data.message.message.includes("username")) {
+        errors.value.email = t("ID Number Already Exist");
+        showToastMessage(
+          t("The ID is already in use, please choose a different ID."),
           toastMessage,
           showToast
         );
       } else {
-        errors.value.general =
-          error.response.data.message ||
-          "An error occurred during registration. Please try again.";
+        errors.value.general = t(
+          "An unexpected error occurred. Please try again later."
+        );
       }
     } else {
       // Handle network or other errors
       showToastMessage(
-        "خطأ في الشبكة، تأكد من اتصالك بالإنترنت",
+        t("Network error, please check your internet connection."),
         toastMessage,
         showToast
       );
@@ -525,5 +555,23 @@ const handleSubmit = async () => {
 <style scoped>
 input {
   background: #f0f0f0;
+}
+.countrycode {
+  position: relative;
+  width: 100%;
+  direction: ltr;
+}
+
+.countrycode input {
+  width: 100%;
+  padding-inline-start: 70px; /* Adjust padding as needed */
+}
+
+.countrycode::after {
+  content: "+966 ";
+  position: absolute;
+  top: 24%;
+  left: 10px;
+  color: black;
 }
 </style>

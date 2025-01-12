@@ -7,6 +7,8 @@ import logging
 def create_notification_token(**kwarg):
     try:
         # accessor = kwarg.get("accessor")
+        frappe.log_error(message=f"Failed to send notification token : {str(kwarg)}",
+            title="Failed to send notification to token")
         token = kwarg.get("token")
         user = kwarg.get("user")
         device_type = kwarg.get("device_type")
@@ -36,6 +38,8 @@ def create_notification_token(**kwarg):
         return {"status": "success", "message": "Token Created.", "token": token}
 
     except Exception as e:
+        frappe.log_error(message=f"Failed to send notification token {token}: {str(e)}",
+                    title="Failed to send notification to token")
         return {
             "status": "fail",
             "message": f"An error occurred. {str(e)}",

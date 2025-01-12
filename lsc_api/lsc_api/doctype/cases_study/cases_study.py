@@ -2,7 +2,10 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate, nowdate, today
+
 
 
 class CasesStudy(Document):
@@ -80,3 +83,73 @@ class CasesStudy(Document):
         cases_quota.consumed_hrs = str(int(consumed_hours + required_hours))
 
         subscription_doc.save()
+
+        comment_settings = frappe.get_doc("Comment Settings")
+        comment_samples = frappe.get_all(
+            "Comment Samples",
+            {"parent": comment_settings, "parentfield": "comment_samples"},
+            "service, comment, enabled, language",
+        )
+
+        client_transaction = frappe.get_doc(
+            "Client Transaction", {"name": self.client_transaction}
+        )
+        lang = frappe.local.lang
+        language = frappe.get_value("Language", {"name": lang}, "language_name")
+        language = _(language)
+        customer = frappe.get_doc("Customer", {"name": self.client})
+        if client_transaction.poa_exp_date:
+            poa_exp_date = getdate(client_transaction.poa_exp_date)
+            current_date = getdate(today())
+
+            if poa_exp_date < current_date:
+                if lang == "ar":
+                    poa_status = "غير سارية"
+                else:
+                    poa_status = "Inactive"
+            else:
+                if lang == "ar":
+                    poa_status = "سارية"
+                else:
+                    poa_status = "Active"
+        else:
+            if lang == "ar":
+                poa_status = "غير سارية"
+            else:
+                poa_status = "Inactive"
+
+        context = {
+            "service": _(client_transaction.item),
+            "client_name": customer.customer_name,
+            "lang": language,
+            "poa_status": poa_status,
+        }
+        for sample in comment_samples:
+            if sample.service == client_transaction.item and sample.language == lang:
+                rendered_template = frappe.render_template(_(sample.comment), context)
+                new_comment = frappe.get_doc(
+                    {
+                        "doctype": "Comment",
+                        "comment_type": "Comment",
+                        "reference_doctype": self.doctype,
+                        "reference_name": self.name,
+                        "content": rendered_template,
+                    }
+                )
+                if sample.enabled:
+                    new_comment.insert(ignore_permissions=True)
+
+@frappe.whitelist()
+def get_allowed_roles_from_settings():
+    frappe.flags.ignore_permissions = True
+
+    settings = frappe.get_doc("Comment Settings", "Comment Settings")
+    table = frappe.get_all(
+        "Roles Table",
+        {"parent": settings, "parentfield": "casestudy_allowed_roles"},
+        "*",
+    )
+
+    allowed_roles = [entry.role for entry in table]
+
+    return allowed_roles

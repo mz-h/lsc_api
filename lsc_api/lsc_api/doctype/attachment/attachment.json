@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2024-09-05 16:25:14.748035",
+ "creation": "2024-12-04 08:29:22.581989",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -30,7 +30,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-09-05 16:25:14.748035",
+ "modified": "2024-12-04 08:29:22.581989",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Attachment",

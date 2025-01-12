@@ -1,8 +1,8 @@
 app_name = "lsc_api"
 app_title = "Lsc Api"
-app_publisher = "M"
+app_publisher = "A O M"
 app_description = "LCS API Integration"
-app_email = "ahmedmansy265@gmail.com"
+app_email = "tanmiyatwebmaster@gmail.com"
 app_license = "mit"
 # required_apps = []
 
@@ -103,7 +103,8 @@ app_license = "mit"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# "send_firebase_notification": "frappe.desk.utils.can_be_accessed_by_guest"
 # }
 #
 # has_permission = {
@@ -134,21 +135,17 @@ app_license = "mit"
 # ---------------
 
 scheduler_events = {
-	# "all": [
-	# 	"lsc_api.tasks.all"
-	# ],
-	"daily": [
-		"lsc_api.tasks.check_transactions_on_hold"
-	],
-	# "hourly": [
-	# 	"lsc_api.tasks.hourly"
-	# ],
-	# "weekly": [
-	# 	"lsc_api.tasks.weekly"
-	# ],
-	# "monthly": [
-	# 	"lsc_api.tasks.monthly"
-	# ],
+    "all": ["lsc_api.lsc_api.sms_api.expire_otps"],
+    "daily": ["lsc_api.lsc_api.tasks.check_transactions_on_hold"],
+    # "hourly": [
+    # 	"lsc_api.tasks.hourly"
+    # ],
+    # "weekly": [
+    # 	"lsc_api.tasks.weekly"
+    # ],
+    # "monthly": [
+    # 	"lsc_api.tasks.monthly"
+    # ],
 }
 
 # Testing
@@ -233,31 +230,79 @@ website_route_rules = [
     {"from_route": "/landing/<path:app_path>", "to_route": "landing"},
 ]
 
-fixtures = ["Custom Field", "Property Setter", "Server Script"]
-
+# fixtures = [
+#     "Account",
+#     "Item Tax Template",
+#     "Contract Template",
+#     "Sales Taxes and Charges Template",
+#     "Subscription Plan",
+#     "Custom Field",
+#     "Subscription Settings",
+#     "Tax Category",
+#     "Dashboard Chart",
+#     "Custom DocPerm",
+#     "Role",
+#     "Server Script",
+#     "SMS Settings",
+#     "System Settings",
+#     "Translation",
+#     "Email Account",
+#     "Email Domain",
+#     "Notification",
+#     "Item",
+#     "Item Price",
+#     "Number Card",
+#     "KSA VAT Setting",
+#     "Property Setter",
+#     "ChatGPT Settings",
+#     "Comment Settings",
+#     "Employee Appointment Type",
+#     "Employee Schedule",
+#     "Firebase Settings",
+#     "Fixed Comment Links",
+#     "Legal Service Types",
+#     "Payment Settings",
+#     "Plans Settings",
+#     "Print Format",
+#     "Branch",
+#     "Designation",
+#     "Holiday List",
+#     "Item Group",
+#     "Terms and Conditions",
+#     "Workspace",
+#     "File",
+#     "Website Settings",
+#     "Navbar Settings",
+#     "Log Settings"
+# ]
 
 
 doc_events = {
-	"*": {
-		"on_update": [
-            
-			"lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
-			"lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.update_due_date",
-		],
-		"on_cancel": [
-			"lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
-		],
-		"on_trash": [
-		],
-		"on_update_after_submit": [
-			"lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
-			"lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.update_due_date",
-		],
-	},
+    "*": {
+        "on_update": [
+            "lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
+            # "lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.update_due_date",
+        ],
+        "on_cancel": [
+            "lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
+        ],
+        "on_update_after_submit": [
+            "lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.apply",
+            # "lsc_api.lsc_api.doctype.assign_by_role.assign_by_role.update_due_date",
+        ],
+    },
     "Notification Log": {
         "validate": "lsc_api.lsc_api.fcm_token.send_firebase_notification"
     },
     "Comment": {
-        "after_insert": "lsc_api.lsc_api.comment_notification.comment_notification"
-    }
+        "after_insert": "lsc_api.lsc_api.comment_notification.comment_notification",
+        "validate": "lsc_api.lsc_api.fcm_token.send_comment_notification",
+    },
+    # "DocShare": {
+    #     "after_insert": "lsc_api.lsc_api.comment_notification.edit_share_checks",
+    # }
 }
+# override_doctype_class = {
+#     "Subscription": "lsc_api.overrides.NewSubscription",
+#     "Notification": "lsc_api.overrides.CustomNotification",
+# }

@@ -1,11 +1,16 @@
 <template>
-  <LoggedInTopNav title="معلومات الحساب" :backArrow="true" />
-  <div class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24">
+  <LoggedInTopNav :title="t('Account Information')" :backArrow="true" />
+  <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24"
+  >
     <div
       class="card article bg-white rounded-sm flex-grow px-4 py-10 gap-10 shadow-md"
     >
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
-        <div class="profile-img relative w-32 h-32 mx-auto mb-4">
+        <div
+          class="profile-img overflow-hidden relative w-32 h-32 mx-auto mb-4"
+        >
           <div @click="allowEdit ? triggerFileInput() : null">
             <!-- Image Display -->
             <img
@@ -36,7 +41,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">البريد الإلكترونى</span>
+                <span class="label-text">
+                  {{ $t("Email") }}
+                </span>
               </div>
               <input
                 type="email"
@@ -49,7 +56,9 @@
             </label>
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">فرع تقديم الخدمات</span>
+                <span class="label-text">
+                  {{ $t("Services Branch") }}
+                </span>
               </div>
               <input
                 type="text"
@@ -60,11 +69,13 @@
             </label>
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">رقم الهوية</span>
+                <span class="label-text">
+                  {{ $t("ID Number") }}
+                </span>
               </div>
               <input
                 type="tel"
-                placeholder="رقم الهوية"
+                :placeholder="t('ID Number')"
                 autocomplete="id"
                 maxlength="14"
                 class="input input-bordered bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
@@ -74,28 +85,34 @@
             </label>
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">رقم الجوال</span>
+                <span class="label-text">
+                  {{ $t("Mobile Number") }}
+                </span>
               </div>
               <input
                 type="tel"
-                placeholder="رقم الجوال"
+                :placeholder="t('Mobile Number')"
                 autocomplete="tel"
                 class="input input-bordered bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
                 v-model="userData.mobile_no"
                 :disabled="!allowEdit"
               />
             </label>
-            <label class="form-control flex-1 font-bold">
-              <div class="label"><span class="label-text">كلمة السر</span></div>
+            <!-- <label class="form-control flex-1 font-bold">
+              <div class="label">
+                <span class="label-text">
+                  {{ $t("Password") }}
+                </span>
+              </div>
               <input
                 type="password"
                 autocomplete="current-password"
-                placeholder="0000000000"
+                placeholder="***********"
                 class="input input-bordered bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
                 v-model="userData.new_password"
                 :disabled="!allowEdit"
               />
-            </label>
+            </label> -->
           </div>
         </div>
         <!-- Save and Edit buttons -->
@@ -104,99 +121,128 @@
           class="btn btn-success text-white w-full max-w-40 self-center"
           :class="allowEdit ? '' : ' hidden'"
         >
-          حفظ التغييرات
+          {{ $t("Save Changes") }}
         </button>
         <button
           type="button"
-          class="btn btn-primary text-white w-full max-w-40 self-center"
+          class="btn btn-primary text-white border-white bg-primary text-white w-full max-w-40 self-center"
           @click="toggleDisable"
           :class="allowEdit ? 'bg-danger' : ''"
         >
-          {{ allowEdit ? "تراجع" : "تعديل" }}
+          {{ allowEdit ? $t("Undo") : $t("Edit") }}
         </button>
         <!-- The button to open modal -->
         <label
           for="my_modal_7"
           class="btn bg-danger text-white w-full max-w-40 self-center"
+          onclick="my_modal_1.showModal()"
           @click="acceptDelete"
         >
-          مسح الحساب
+          {{ $t("Delete Account") }}
         </label>
         <!-- Put this part before </body> tag -->
-        <input type="checkbox" id="my_modal_7" class="modal-toggle" />
-        <div class="modal" role="dialog">
+        <dialog class="modal" id="my_modal_1" role="dialog">
           <div class="modal-box text-center">
-            <h3 class="text-lg font-bold">هل أنت متأكد من مسح الحساب</h3>
-            <p class="py-4">يمكنك التواصل مع خدمة العملاء من هنا.</p>
+            <h3 class="text-lg font-bold">
+              {{ $t("Are you sure you want to delete the account?") }}
+            </h3>
+            <p class="py-4">
+              {{ $t("You can contact customer service from here.") }}
+            </p>
             <div class="btns-action">
               <!-- The button to open modal -->
               <label
                 for="my_custom_modal"
                 class="btn bg-danger text-white w-full max-w-40"
+                onclick="my_custom_modal.showModal()"
                 @click="acceptDelete2"
-                >أريد مسح الحساب.</label
               >
+                {{ $t("I want to delete the account.") }}
+              </label>
               <!-- Put this part before </body> tag -->
-              <input
-                type="checkbox"
-                id="my_custom_modal"
-                class="modal-toggle"
-              />
-              <div class="modal" role="dialog">
+              <dialog class="modal" id="my_custom_modal" role="dialog">
                 <div class="modal-box text-center">
-                  <h3 class="text-lg font-bold">لا يمكن الرجوع في هذا</h3>
-                  <p class="py-4">ستخسر اشتراكاك ان كنت مشترك.</p>
+                  <h3 class="text-lg font-bold">
+                    {{ $t("You cannot revert this.") }}
+                  </h3>
+                  <p class="py-4">
+                    {{
+                      $t(
+                        "You will lose your subscription if you are subscribed."
+                      )
+                    }}
+                  </p>
                   <div class="btns-action">
                     <button
                       class="btn bg-danger"
                       type="button"
                       @click="handleDelete"
                     >
-                      تأكيد مسح الحساب
+                      {{ $t("Confirm Account Deletion") }}
                     </button>
                   </div>
                   <div class="modal-action">
-                    <label for="my_custom_modal" class="btn bg-success"
-                      >تراجع</label
-                    >
+                    <form method="dialog">
+                      <!-- if there is a button in form, it will close the modal -->
+                      <button ref="warnBTN" class="btn bg-success">
+                        {{ $t("Undo") }}
+                      </button>
+                    </form>
                   </div>
                 </div>
-              </div>
+              </dialog>
               <div class="modal-action">
-                <label for="my_modal_7" class="btn bg-success">تراجع</label>
+                <form method="dialog">
+                  <button ref="warnBTN2" class="btn bg-success">
+                    {{ $t("Undo") }}
+                  </button>
+                </form>
               </div>
             </div>
           </div>
-          <label class="modal-backdrop" for="my_modal_7"></label>
-        </div>
+        </dialog>
       </form>
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import Loader from "@/components/Loader.vue";
 import ProfilePic from "../assets/images/profile.png";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const fileInput = ref(null);
 const userData = ref({
   email: "",
-  mobile_no: null,
-  user_image: null,
-  custom_id_number: null,
-  new_password: null,
+  mobile_no: "",
+  user_image: "",
+  custom_id_number: "",
+  // new_password: null,
 });
 const allowEdit = ref(false);
 const loading = ref(false);
 const navigate = useRouter();
 const firstWarn = ref(false);
 const secondWarn = ref(false);
+const warnBTN = ref(null);
+const warnBTN2 = ref(null);
+const triggerWarnButton = () => {
+  if (warnBTN.value) {
+    warnBTN.value.click();
+  }
+  if (warnBTN2.value) {
+    warnBTN2.value.click();
+  }
+};
+
 // Trigger the file input click when the overlay is clicked
 const triggerFileInput = () => {
   fileInput.value.click();
@@ -227,7 +273,7 @@ const handleSubmit = async () => {
   formData.append("email", userData.value.email);
   formData.append("mobile_no", userData.value.mobile_no);
   formData.append("custom_id_number", userData.value.custom_id_number);
-  formData.append("new_password", userData.value.new_password);
+  // formData.append("new_password", userData.value.new_password);
   if (fileInput.value && fileInput.value.files.length > 0) {
     formData.append("user_image", fileInput.value.files[0]);
   }
@@ -252,6 +298,7 @@ const handleSubmit = async () => {
 // Toggle edit mode
 const toggleDisable = () => {
   allowEdit.value = !allowEdit.value;
+  if (!allowEdit.value) getUserData();
 };
 
 // Handle file change and show the uploaded image as preview
@@ -274,6 +321,7 @@ function acceptDelete2() {
 }
 
 async function handleDelete() {
+  triggerWarnButton();
   if (firstWarn && secondWarn) {
     const del = JSON.stringify({ access_key: "Disable" });
     await fetch("/api/method/lsc_api.lsc_api.disable_user.disable_user", {

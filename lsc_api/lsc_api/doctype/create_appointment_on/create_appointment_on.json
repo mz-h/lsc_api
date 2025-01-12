@@ -6,7 +6,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "service_name"
+  "service_name",
+  "role",
+  "employee_appointment_type"
  ],
  "fields": [
   {
@@ -18,11 +20,28 @@
    "options": "Item",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "employee_appointment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Appointment Type",
+   "options": "Employee Appointment Type"
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Role",
+   "options": "Role",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-05 13:16:10.878403",
+ "modified": "2024-10-09 23:02:38.103770",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Create Appointment On",

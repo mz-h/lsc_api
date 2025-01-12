@@ -1,6 +1,7 @@
 <template>
-  <LoggedInTopNav title="حالة الدفع" :backArrow="true" />
+  <LoggedInTopNav :title="t('Previous Invoices')" :backArrow="true" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24 pay"
   >
     <div v-if="paidInvoices">
@@ -13,7 +14,7 @@
           :key="ind"
         >
           <h2 class="invCardType text-black">
-            {{ invoice.item[0].item_name }}
+            {{ invoice.item }}
           </h2>
           <ul class="leading-8 flex justify-between text-success">
             <div class="flex gap-2 items-center">
@@ -30,12 +31,12 @@
             </div>
             <li>
               <p class="text-md text-wrap">
-                {{ invoice.creation.split(" ")[0] }}
+                {{ formatTimestampTo12Hour(invoice.creation) }}
               </p>
             </li>
           </ul>
           <button @click="toggleView(ind)" class="btn bg-primary text-white">
-            {{ visibleInvoices[ind] ? "إخفاء" : "عرض الفاتورة" }}
+            {{ visibleInvoices[ind] ? $t("Hide") : $t("Show Invoice") }}
           </button>
           <div :class="visibleInvoices[ind] ? '' : 'hidden'">
             <RouterLink
@@ -46,22 +47,26 @@
               target="_blank"
               class="btn btn-sm w-full bg-primary border-primary rounded h-8 text-white"
             >
-              عرض
+              {{ $t("Show") }}
             </RouterLink>
           </div>
         </div>
       </div>
     </div>
-    <div v-else>لا يوجد فواتير سابقة</div>
+    <div v-else>
+      {{ $t("No Old Invoices") }}
+    </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 
@@ -98,12 +103,43 @@ async function getInvoices() {
       console.error("Failed to get invoices");
     }
   } catch (error) {
-    console.log("error" + error);
+    console.error(error);
   } finally {
     loading.value = false;
   }
 }
 
+function formatTimestampTo12Hour(timestamp) {
+  // Create a new Date object from the timestamp string
+  const date = new Date(timestamp);
+
+  // Get the name of the day (e.g., Monday, Tuesday, etc.)
+  let dayName;
+  if (locale.value == "en") {
+    dayName = date.toLocaleDateString("en", { weekday: "short" });
+  } else {
+    dayName = date.toLocaleDateString("ar-EG", { weekday: "short" });
+  }
+
+  // Extract parts of the date
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
+  const day = String(date.getDate()).padStart(2, "0");
+
+  // Format hours and minutes
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  let ampm;
+  if (locale.value == "en") {
+    ampm = hours >= 12 ? "PM" : "AM";
+  } else {
+    ampm = hours >= 12 ? "مساءاً" : "صباحاً";
+  }
+  hours = hours % 12 || 12; // Convert 24h to 12h format
+
+  // Return the formatted date string with the day name
+  return `${hours}:${minutes} ${ampm} / ${day}-${month}-${year}`;
+}
 // Function to toggle the visibility of a specific invoice
 function toggleView(ind) {
   visibleInvoices.value[ind] = !visibleInvoices.value[ind];

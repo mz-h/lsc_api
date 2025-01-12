@@ -1,68 +1,62 @@
 <template>
-  <LoggedInTopNav :title="servName" :backArrow="true" />
+  <LoggedInTopNav :title="servTitle" :backArrow="true" />
 
-  <div class="w-full h-screen flex items-center justify-center p-8 bg-gray-100">
+  <div
+    class="w-full h-screen flex items-center justify-center p-8 bg-gray-100"
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+  >
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <label class="form-control w-full">
-          <select
-            class="select select-bordered w-full bg-white px-8"
-            v-model="selectedType"
-          >
-            <option v-for="type in caseTypes" :key="type" :value="type">
-              {{ type }}
-            </option>
-          </select>
-        </label>
-
         <label class="form-control w-full">
           <input
             v-model="title"
             type="text"
-            placeholder="القضية"
+            :placeholder="t('Case Title')"
             class="input input-bordered w-full"
           />
         </label>
 
+        <label class="form-control w-full">
+          <input
+            v-model="description"
+            type="text"
+            :placeholder="t('Case Description')"
+            class="input input-bordered w-full"
+          />
+        </label>
 
         <label
-        for="dropzone-file"
-        class="flex flex-col items-center justify-center h-full w-full h-16 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 bg-white"
-      >
-        <div class="flex flex-col items-center justify-center pt-2 pb-2">
-          <font-awesome-icon
-            v-if="!changeIcon"
-            icon="fa-solid fa-cloud-arrow-up"
-          />
-          <font-awesome-icon v-else icon="fa-solid fa-circle-check" />
-          <span class="font-semibold">
-            {{ changeIcon ? "تم إرفاق الملف" : "اضغط هنا للإرفاق" }}
-          </span>
-          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-            {{ changeIcon ? upFile : " صور أو ملفات أو وسائط" }}
-          </p>
-        </div>
-        <input
-          @change="handleFileChange"
-          ref="file"
-          id="dropzone-file"
-          type="file"
-          class="hidden"
-        />
-      </label>
-
-        <!-- <label class="form-control w-full">
-          <div class="label">
-            <span class="label-text-alt">إرفاق ملف</span>
+          for="dropzone-file"
+          class="flex flex-col items-center justify-center h-full w-full h-16 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 bg-white"
+        >
+          <div class="flex flex-col items-center justify-center pt-2 pb-2">
+            <font-awesome-icon
+              v-if="!changeIcon"
+              icon="fa-solid fa-cloud-arrow-up"
+            />
+            <font-awesome-icon v-else icon="fa-solid fa-circle-check" />
+            <span class="font-semibold">
+              {{ changeIcon ? $t("File Attached") : $t("Attach File") }}
+            </span>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {{ changeIcon ? upFile : $t("Images, Pdfs or Sounds") }}
+            </p>
           </div>
           <input
+            @change="handleFileChange"
             ref="file"
+            id="dropzone-file"
             type="file"
-            class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+            class="hidden"
           />
-        </label> -->
+        </label>
 
-        <button type="submit" class="btn btn-primary w-full">إرسال</button>
+        <button
+          type="submit"
+          class="btn btn-primary text-white border-white bg-primary w-full"
+        >
+          {{ $t("Send") }}
+        </button>
       </form>
 
       <div
@@ -75,19 +69,23 @@
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
 import { ref } from "vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import Loader from "@/components/Loader.vue";
 import axios from "axios";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
 
 const loading = ref(false);
 const title = ref("");
+const description = ref("");
 const file = ref(null);
 const upFile = ref(null);
 const changeIcon = ref(false);
@@ -102,34 +100,21 @@ const message = ref("");
 const messageClass = ref("");
 const route = useRoute();
 const servName = route.query.elemnt || "";
-const caseTypes = ref([
-  "قضية جنائية",
-  "قضية عمالية",
-  "قضية احوال شخصية",
-  "قضية عامة",
-]);
-const selectedType = ref("");
+const servTitle = route.query.elementName || "";
 
 const handleSubmit = () => {
   // Validation: Check if the title is empty or less than 5 characters
   if (title.value.length < 5) {
-    message.value = "الرجاء إدخال عنوان القضية (على الأقل 5 أحرف)";
+    message.value = t("Please enter title (at least 5 characters)");
     messageClass.value = "bg-red-100 text-red-800 border border-red-300";
     return; // Stop the form submission if validation fails
   }
-
-  // Validation: Check if the case type is selected
-  if (!selectedType.value) {
-    message.value = "الرجاء اختيار نوع القضية";
-    messageClass.value = "bg-red-100 text-red-800 border border-red-300";
-    return; // Stop the form submission if validation fails
-  }
-
   loading.value = true;
+
   const formData = new FormData();
   formData.append("name", servName);
   formData.append("title", title.value);
-  formData.append("department", selectedType.value);
+  formData.append("case_description", description.value);
   if (file.value && file.value.files.length > 0) {
     formData.append("file", file.value.files[0]);
   }
@@ -137,26 +122,39 @@ const handleSubmit = () => {
   axios
     .post("/api/method/lsc_api.lsc_api.create_case.create_case", formData)
     .then((response) => {
-      loading.value = false;
       const data = response.data;
       if (data.message.status === "success") {
-        message.value = "تم الحجز بنجاح";
+        message.value = t("Successfully Booked");
         messageClass.value =
           "bg-green-100 text-green-800 border border-green-300";
+        setTimeout(() => {
+          router.push({
+            path: `/requests/requestDetails/`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 500);
       } else {
-        message.value = "حدث خطأ اثناء الحجز";
+        message.value = t("An error occurred while booking");
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
       }
     })
     .catch((error) => {
       loading.value = false;
       messageClass.value = "bg-red-100 text-red-800 border border-red-300";
-      if (error.response.data.exception.includes("hours quota")) {
-        message.value = "رصيد الساعات المتبقية غير كافي.";
+      if (error.response.data.exception.includes("hours")) {
+        message.value = t("Remaining hour balance is insufficient.");
+        setTimeout(() => {
+          router.push({
+            path: `/packages`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 1500);
       } else if (error.response.data.exception.includes("expire_date")) {
-        message.value = "التوكيل المرفق غير صالح، برجاء مراجعة تاريخ التوكيل.";
+        message.value = t(
+          "The attached authorization is invalid, please check the authorization date."
+        );
       } else {
-        message.value = "حدث خطأ اثناء حجز الخدمة";
+        message.value = t("An error occurred while booking the service");
       }
     });
 };

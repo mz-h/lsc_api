@@ -3,6 +3,22 @@
 
 frappe.ui.form.on("Legal Service", {
     refresh(frm) {
+        frappe.call({
+            method: 'lsc_api.lsc_api.doctype.legal_service.legal_service.get_allowed_roles_from_settings',
+            callback: function (response) {
+                let allowed_roles = response.message || [];
+                let has_permission = frappe.user_roles.some(role => allowed_roles.includes(role));
+                console.log(allowed_roles);
+                console.log(has_permission);
+
+                if (!has_permission) {
+                    $('.btn-comment').hide();
+                    $('.comment-box').hide();
+                    $('.custom-actions').hide();
+                }
+            }
+        });
+
         frm.add_custom_button(__('Add Link to Comments'), function () {
             let d = new frappe.ui.Dialog({
                 title: 'Insert Link',
@@ -24,7 +40,7 @@ frappe.ui.form.on("Legal Service", {
                     {
                         label: 'Link',
                         fieldname: 'link',
-                        fieldtype: 'Data',
+                        fieldtype: 'Small Text',
                         description: 'Insert link (e.g., http://meet.google.com)',
                         reqd: 0,
                         depends_on: 'eval: doc.use_custom_link == 0'

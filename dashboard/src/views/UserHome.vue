@@ -1,12 +1,15 @@
 <template>
-  <LoggedInTopNav title="الرئيسية" :backArrow="false" />
+  <LoggedInTopNav :title="t('Home')" :backArrow="false" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="fixed w-full flex flex-col sm:grid sm:grid-cols-5 sm:grid-rows-2 gap-3 mt-20 lg:h-[90vh]"
   >
     <div class="row-span-2 hidden lg:block">
       <SideNav />
     </div>
+    <Loader v-if="loadingSub || loadingCurrent" />
     <div
+      v-else
       class="py-4 bg-[ghostwhite] h-[80vh] overflow-y-scroll flex flex-col sm:col-span-5 lg:col-span-4 sm:grid sm:grid-cols-4 sm:grid-rows-2 gap-4"
     >
       <div
@@ -40,7 +43,9 @@
               {{ subscription.consultation_hrs }} /
               {{ subscription.remaining_consultation_hrs }}
             </div>
-            <span class="text-lg font-bold text-black"> الاستشارات </span>
+            <span class="text-md font-bold text-black">
+              {{ $t("Consultations") }}
+            </span>
           </RouterLink>
           <RouterLink
             :to="{ name: 'CurrentPackageView' }"
@@ -59,7 +64,9 @@
               {{ subscription.cases_hrs }} /
               {{ subscription.remaining_cases_hrs }}
             </div>
-            <span class="text-lg font-bold text-black"> القضايا </span>
+            <span class="text-md font-bold text-black">
+              {{ $t("Cases") }}
+            </span>
           </RouterLink>
           <RouterLink
             :to="{ name: 'CurrentPackageView' }"
@@ -79,23 +86,27 @@
               {{ subscription.legal_services_hrs }} /
               {{ subscription.remaining_legal_services_hrs }}
             </div>
-            <span class="text-lg font-bold text-black"> الخدمات </span>
+            <span class="text-md font-bold text-black">
+              {{ $t("Services") }}
+            </span>
           </RouterLink>
         </div>
-        <RouterLink :to="{ name: 'CurrentPackageView' }" class="text-success"
-          >إدارة الباقة</RouterLink
-        >
+        <RouterLink :to="{ name: 'CurrentPackageView' }" class="text-success">{{
+          $t("Package Managment")
+        }}</RouterLink>
       </div>
       <div
         v-else
         class="services w-full px-6 gap-5 flex flex-col items-center justify-center"
       >
         <h2 class="services__heading font-bold text-gray-400 mb-2 lg:text-3xl">
-          لا يوجد اشتراك
+          {{ $t("No Subscription") }}
         </h2>
         <RouterLink :to="{ name: 'PackagesView' }">
-          <button class="btn btn-primary text-white lg:btn-lg">
-            اشترك الان
+          <button
+            class="btn btn-primary text-white border-white bg-primary text-white lg:btn-lg"
+          >
+            {{ $t("Subscribe Now") }}
           </button>
         </RouterLink>
       </div>
@@ -104,7 +115,7 @@
         class="services overflow-visible sm:overflow-hidden place-content-center w-full px-6 gap-5 col-span-2 col-start-3"
       >
         <h2 class="services__heading font-bold text-black mb-2 lg:text-3xl">
-          الطلبات الحالية
+          {{ $t("Current Requests") }}
         </h2>
         <div
           :class="[
@@ -153,12 +164,9 @@
             <div class="card-body">
               <div class="card__title flex flex-col gap-2">
                 <h1 class="card-title text-wrap text-gray-400 text-3xl">
-                  لا يوجد طلبات حالية
+                  {{ $t("No Current Requests") }}
                 </h1>
               </div>
-              <!-- <RouterLink :to="{ name: 'ServicesView' }">
-              <button class="btn btn-primary btn-sm text-white">إنشاء طلب خدمة</button>
-            </RouterLink> -->
             </div>
           </div>
         </div>
@@ -167,12 +175,12 @@
             <button
               :class="[
                 'btn',
-                'btn-primary',
+                ' btn-primary text-white border-white	 bg-primary',
                 'text-white',
                 !availableRequests ? 'btn-md mr-12' : 'btn-sm',
               ]"
             >
-              إنشاء طلب خدمة
+              {{ $t("Create Service Request") }}
             </button>
           </RouterLink>
           <RouterLink :to="{ name: 'RequestsView' }">
@@ -184,7 +192,7 @@
                 !availableRequests ? 'btn-md mr-12' : 'btn-sm',
               ]"
             >
-              كل الطلبات...
+              {{ $t("All Requests...") }}
             </button>
           </RouterLink>
         </div>
@@ -193,9 +201,11 @@
         class="services place-content-center px-5 flex flex-col gap-3 col-span-2 col-start-3 row-start-2"
       >
         <h2 class="services__heading font-bold text-black lg:text-3xl">
-          الخدمات المتاحة
+          {{ $t("Available Services") }}
         </h2>
-        <h3 v-if="subscription" class="services__sub-heading">حسب باقتك</h3>
+        <!-- <h3 v-if="subscription" class="services__sub-heading">
+          {{ $t("According to Your Package") }}
+        </h3> -->
         <div class="w-full overflow-visible flex gap-4 py-2 overflow-x-scroll">
           <div
             v-if="
@@ -204,12 +214,13 @@
               subscription.allowed_services.length
             "
             class="card shadow-mycard bg-white text-primary-content w-[80%] max-w-96 flex-shrink-0"
-            v-for="(sub, index) in subscription.allowed_services.slice(0, 3)"
+            v-for="(sub, index) in subscription.allowed_services"
             :key="index"
           >
-            <div :class="[index < 3 ? '' : 'hidden', 'card-body']">
+            <!-- <div :class="[index < 3 ? '' : 'hidden', 'card-body']"> -->
+            <div class="card-body place-items-center place-content-center">
               <div
-                class="card__title flex gap-2 items-center justify-center min-w-40"
+                class="card__title flex text-center gap-2 items-center justify-center min-w-40"
               >
                 <font-awesome-icon icon="fa-regular fa-handshake" />
                 <RouterLink :to="{ name: 'ServicesView' }">
@@ -233,11 +244,11 @@
                 >
                   <h3 class="card-title text-md text-wrap">
                     <font-awesome-icon icon="fa-regular fa-handshake" />
-                    قسم الاستشارات
+                    {{ $t("Consultation Section") }}
                   </h3>
-                  <p class="text-sm">استشارة كتابية</p>
-                  <p class="text-sm">استشارة حضورية</p>
-                  <p class="text-sm">استشارة عن بعد</p>
+                  <p class="text-sm">{{ $t("Written Consultation") }}</p>
+                  <p class="text-sm">{{ $t("In-Person Consultation") }}</p>
+                  <p class="text-sm">{{ $t("Remote Consultation") }}</p>
                 </div>
               </RouterLink>
             </div>
@@ -252,11 +263,11 @@
                 >
                   <h3 class="card-title text-md text-wrap">
                     <font-awesome-icon icon="fa-regular fa-handshake" />
-                    قسم الخدمات
+                    {{ $t("Services Section") }}
                   </h3>
-                  <p class="text-sm">خدمة التصالح</p>
-                  <p class="text-sm">فض نزاعات</p>
-                  <p class="text-sm">خدمة أخرى</p>
+                  <p class="text-sm">{{ $t("Reconciliation Service") }}</p>
+                  <p class="text-sm">{{ $t("Dispute Resolution") }}</p>
+                  <p class="text-sm">{{ $t("Other Service") }}</p>
                 </div>
               </RouterLink>
             </div>
@@ -271,11 +282,11 @@
                 >
                   <h3 class="card-title text-md text-wrap">
                     <font-awesome-icon icon="fa-regular fa-handshake" />
-                    قسم التقاضي
+                    {{ $t("Litigation Section") }}
                   </h3>
-                  <p class="text-sm">قضية عمالية</p>
-                  <p class="text-sm">قضية تجارية</p>
-                  <p class="text-sm">قضية جنائية</p>
+                  <p class="text-sm">{{ $t("Labor Case") }}</p>
+                  <p class="text-sm">{{ $t("Commercial Case") }}</p>
+                  <p class="text-sm">{{ $t("Criminal Case") }}</p>
                 </div>
               </RouterLink>
             </div>
@@ -284,30 +295,37 @@
             <div class="card-body">
               <div class="card__title flex flex-col gap-2">
                 <h1 class="card-title text-wrap text-gray-400 text-xl mb-4">
-                  أنت غير مشترك في أي باقة
+                  {{ $t("You are not subscribed to any package.") }}
                 </h1>
               </div>
               <!-- <RouterLink :to="{ name: 'ServicesView' }">
-              <button class="btn btn-primary btn-sm text-white">إنشاء طلب خدمة</button>
+              <button class="btn  btn-primary text-white border-white	 bg-primary btn-sm text-white">إنشاء طلب خدمة</button>
             </RouterLink> -->
               <RouterLink to="/packages">
                 <button
                   :class="[
-                    'btn btn-primary text-white',
+                    'btn  btn-primary text-white border-white	 bg-primary text-white',
                     !subscription ? 'btn-md' : 'btn-sm',
                   ]"
                 >
-                  اشترك الان
+                  {{ $t("Subscribe Now") }}
                 </button>
               </RouterLink>
             </div>
           </div>
         </div>
-        <RouterLink v-if="subscription" :to="{ name: 'ServicesView' }">
+        <!-- <RouterLink v-if="subscription" :to="{ name: 'ServicesView' }">
           <button :class="['btn', 'btn-outline', 'text-black', 'self-center']">
-            كل الخدمات...
+            {{ $t("All Services...") }}
           </button>
-        </RouterLink>
+        </RouterLink> -->
+      </div>
+    </div>
+  </div>
+  <div v-if="showToast" class="relative">
+    <div class="toast bottom-20 left-1/2 -translate-x-1/2">
+      <div class="alert alert-info bg-white border-2 border-primary">
+        <span>{{ toastMessage }}</span>
       </div>
     </div>
   </div>
@@ -316,31 +334,44 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
 import BottomNav from "@/components/BottomNav.vue";
 import SideNav from "@/components/SideNav.vue";
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { ref, onMounted, watch, onBeforeUnmount, inject, reactive } from "vue";
+import showToastMessage from "../router/toastmessage";
+
+import {
+  ref,
+  onMounted,
+  onUnmounted,
+  watch,
+  onBeforeUnmount,
+  inject,
+  reactive,
+} from "vue";
 import { notificationsState } from "../router/notificationsState";
 import { AgCharts } from "ag-charts-vue3";
+import { useQuery } from "@tanstack/vue-query";
 
 const remHours = ref("15");
 const conHours = ref("20");
 const chartOptions = ref({});
-// Chart options (reactive)
 
 const loading = ref(false);
 const hasNewNotifications = ref(false);
-// const socket = inject("$socket");
 const navigate = useRouter();
 const subscription = ref([]);
 const availableRequests = ref([]);
+const showToast = ref(false);
+const toastMessage = ref(null);
 
 const handleRealtimeNotifications = (data) => {
   hasNewNotifications.value = true;
-  // console.log("socket update");
+  console.log("socket update");
   notificationsState.hasNewNotifications = true;
 };
 
@@ -373,9 +404,9 @@ const handleRealtimeNotifications = (data) => {
 //   cleanupSocketListeners();
 // });
 
-const markNotificationsAsViewed = () => {
-  hasNewNotifications.value = false;
-};
+// const markNotificationsAsViewed = () => {
+//   hasNewNotifications.value = false;
+// };
 
 fetch("/api/method/frappe.auth.get_logged_user", {
   method: "GET",
@@ -384,6 +415,7 @@ fetch("/api/method/frappe.auth.get_logged_user", {
 })
   .then((response) => {
     if (!response.ok) {
+      localStorage.setItem("asp_status", 3);
       throw new Error("You are not logged In");
     }
     return response.json();
@@ -391,99 +423,125 @@ fetch("/api/method/frappe.auth.get_logged_user", {
   .then()
   .catch(() => navigate.replace("/"));
 
-const fetchData = async () => {
-  loading.value = true;
+const getUserData = async () => {
   try {
     const response = await fetch(
-      "/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.get_subscription_status"
+      "/api/method/lsc_api.lsc_api.get_user_data.get_user_data"
     );
-    const data = await response.json();
-    // This is for the subscriped user
-    const val = data.message.data.subscription;
-    if (val && val != "null") {
-      loading.value = false;
-      subscription.value = data.message.data.subscription;
-      conHours.value = Math.abs(
-        subscription.value.total_hours - subscription.value.remaining_hours
-      );
-      remHours.value = subscription.value.remaining_hours;
-      chartOptions.value = {
-        data: [
-          {
-            segment: "المستهلكة",
-            value: parseInt(conHours.value),
-          },
-          {
-            segment: "المتبقية",
-            value: parseInt(remHours.value),
-          },
-        ],
-        title: {
-          text: data.message.data.subscription.subscription_plan,
-          fontFamily: "Cairo",
-          fontWeight: "bold",
-        },
-        subtitle: {
-          enabled: true,
-          text: `${subscription.value.total_hours} مجموع الساعات`,
-          fontFamily: "Cairo",
-        },
-        legend: {
-          pagination: {
-            label: {
-              fontFamily: "Cairo",
-            },
-          },
-          item: {
-            label: {
-              fontFamily: "Cairo",
-              fontWeight: "bold",
-            },
-          },
-        },
-        series: [
-          {
-            type: "pie",
-            angleKey: "value",
-            calloutLabelKey: "segment",
-            sectorLabelKey: "value",
-            fills: ["#981D20", "#5978B9"],
-            sectorLabel: {
-              color: "white",
-              fontFamily: "Cairo",
-              fontWeight: "bold",
-            },
-            tooltip: {
-              enabled: false,
-            },
-          },
-        ],
-      };
-    } else {
-      loading.value = false;
-      subscription.value = null;
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
     }
+    const data = await response.json();
+    locale.value = data.message.user_data.language;
+    console.log("lang=" + locale.value);
   } catch (error) {
-    loading.value = false;
-    console.error("Error fetching data:", error);
+    console.error("Error fetching user data:", error);
   }
 };
 
-const fetchRequests = async () => {
-  loading.value = true;
-  try {
-    const response = await axios.get(
-      "/api/method/lsc_api.lsc_api.get_current_requests.get_current_requests"
+const fetchDataQ = () =>
+  axios.get(
+    "/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.get_subscription_status"
+  );
+
+const { data: subData, isLoading: loadingSub } = useQuery({
+  queryKey: ["subData"],
+  queryFn: fetchDataQ,
+  // enabled: activeIndex.value === 0,
+});
+
+const fetchCurrentRequests = () =>
+  axios.get(
+    "/api/method/lsc_api.lsc_api.get_current_requests.get_current_requests"
+  );
+
+const {
+  data: currentRequests,
+  isLoading: loadingCurrent,
+  isError,
+  error,
+} = useQuery({
+  queryKey: ["currentRequests"],
+  queryFn: fetchCurrentRequests,
+  // enabled: activeIndex.value === 0,
+});
+
+function loadData() {
+  availableRequests.value = currentRequests?.value?.data?.message?.requests;
+  const val = subData?.value?.data?.message?.data?.subscription;
+
+  if (val && val != "null") {
+    subscription.value = subData?.value?.data?.message?.data?.subscription;
+
+    conHours.value = Math.abs(
+      subscription?.value?.total_hours - subscription?.value?.remaining_hours
     );
-    if (response.data.message.requests) {
-      loading.value = false;
-      availableRequests.value = response.data.message.requests;
-    }
-  } catch (error) {
-    loading.value = false;
-    console.error("Failed to fetch requests:", error);
+    remHours.value = subscription?.value?.remaining_hours;
+    chartOptions.value = {
+      data: [
+        {
+          segment: t("Consumed"),
+          value: parseInt(conHours.value),
+        },
+        {
+          segment: t("Remaining"),
+          value: parseInt(remHours.value),
+        },
+      ],
+      title: {
+        text: subscription?.value?.subscription_plan,
+        fontFamily: "Cairo",
+        fontWeight: "bold",
+      },
+      subtitle: {
+        enabled: true,
+        text: `${subscription?.value?.total_hours} ${t("Total Hours")}`,
+        fontFamily: "Cairo",
+      },
+      legend: {
+        pagination: {
+          label: {
+            fontFamily: "Cairo",
+          },
+        },
+        item: {
+          label: {
+            fontFamily: "Cairo",
+            fontWeight: "bold",
+          },
+        },
+      },
+      series: [
+        {
+          type: "pie",
+          angleKey: "value",
+          calloutLabelKey: "segment",
+          sectorLabelKey: "value",
+          fills: ["#981D20", "#5978B9"],
+          sectorLabel: {
+            color: "white",
+            fontFamily: "Cairo",
+            fontWeight: "bold",
+          },
+          tooltip: {
+            enabled: false,
+          },
+        },
+      ],
+    };
   }
-};
+  loading.value = false;
+
+  if (subData?.value?.data?.message?.asp_status == "Complete") {
+    localStorage.setItem("asp_status", 2);
+  } else if (localStorage.getItem("asp_status") == 1) {
+    localStorage.setItem("asp_status", 1);
+  } else if (localStorage.getItem("asp_status") == 3) {
+    localStorage.removeItem("asp_status");
+  } else {
+    localStorage.setItem("asp_status", 0);
+  }
+}
 
 const router = useRouter();
 
@@ -493,11 +551,49 @@ const goToCaseStudyDetail = (requestId) => {
     query: { requestId: requestId },
   });
 };
-
+// remove any uploads for request details uploading indecators
+function getValueByPartialKey(partialKey) {
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.includes(partialKey)) {
+      return localStorage.removeItem(key); // Return the value of the matched key
+    }
+  }
+  return null; // Return null if no match is found
+}
 onMounted(() => {
-  // setupSocketListeners();
-  fetchData();
-  fetchRequests();
+  // localStorage.setItem("asp_status", 2);
+  // localStorage.removeItem("socketOpen");
+  getUserData();
+  loadData();
+  loading.value = true;
+  setTimeout(() => {
+    loadData();
+    loading.value = false;
+  }, 2000);
+
+  setTimeout(() => {
+    if (localStorage.getItem("asp_status") == 0) {
+      showToastMessage(
+        t("Complete your profile info"),
+        toastMessage,
+        showToast
+      );
+      setTimeout(() => {
+        navigate.push({ path: `/profile/AccountStatusPage` });
+      }, 1000);
+    } else if (localStorage.getItem("asp_status") == 1) {
+      showToastMessage(
+        t("Complete your profile info"),
+        toastMessage,
+        showToast
+      );
+    }
+  }, 2500);
+});
+
+onUnmounted(() => {
+  getValueByPartialKey("uploading");
 });
 </script>
 

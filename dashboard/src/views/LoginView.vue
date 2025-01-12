@@ -1,6 +1,7 @@
 <template>
-  <LoggedInTopNav title="تسجيل الدخول" />
+  <LoggedInTopNav :title="t('Login')" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="flex px-6 sm:px-20 items-center justify-center min-h-screenpx-6 py-40 bg-gray-100 rtl"
   >
     <div class="w-full max-w-sm p-6 bg-white rounded-lg shadow-md">
@@ -8,7 +9,7 @@
         <img :src="Logo" alt="LSC Logo" class="block w-full" />
       </div>
       <h2 class="mb-4 text-2xl font-bold text-center text-gray-700">
-        تسجيل الدخول
+        {{ $t("Login") }}
       </h2>
       <form @submit.prevent="handleLogin" class="text-right">
         <!-- Username/Email Input -->
@@ -16,14 +17,15 @@
           <label
             for="username"
             class="block mb-2 text-sm font-medium text-gray-600"
-            >اسم المستخدم</label
           >
+            {{ $t("ID Number:") }}
+          </label>
           <input
             type="text"
             id="username"
             v-model="form.username"
             class="input input-bordered w-full text-black"
-            placeholder="اسم المستخدم"
+            :placeholder="t('ID Number:')"
             autocomplete="name"
           />
           <!-- Error Message for Username -->
@@ -37,14 +39,15 @@
           <label
             for="password"
             class="block mb-2 text-sm font-medium text-gray-600"
-            >كلمة المرور</label
           >
+            {{ $t("Password") }}
+          </label>
           <input
             type="password"
             id="password"
             v-model="form.password"
             class="input input-bordered w-full text-black"
-            placeholder="أدخل كلمة المرور"
+            :placeholder="t('Password')"
             autocomplete="current-password"
           />
           <!-- Error Message for Password -->
@@ -60,21 +63,27 @@
 
         <!-- Login Button -->
         <div>
-          <button type="submit" class="btn btn-primary w-full text-white">
-            تسجيل الدخول
+          <button
+            type="submit"
+            class="btn btn-primary text-white border-white bg-primary w-full"
+          >
+            {{ $t("Login") }}
           </button>
         </div>
       </form>
 
       <!-- Additional Links -->
       <div class="mt-6 text-center">
-        <a href="#" class="text-sm text-blue-600 hover:underline">
-          هل نسيت كلمة المرور؟
-        </a>
+        <RouterLink
+          to="/reset-password"
+          class="text-sm text-blue-600 hover:underline"
+        >
+          {{ $t("Forgot Password?") }}
+        </RouterLink>
       </div>
       <div class="mt-2 text-center">
         <RouterLink to="/signup" class="text-sm text-blue-600 hover:underline">
-          لا تملك حساباً؟إنشاء حساب
+          {{ $t("Don't have an account? Create Account") }}
         </RouterLink>
       </div>
     </div>
@@ -99,6 +108,9 @@
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
 import Logo from "../assets/images/icons/logo.png";
 import axios from "axios";
@@ -120,10 +132,7 @@ const requestOptions = {
   redirect: "follow",
 };
 // Check loggedin
-fetch(
-  "/api/method/frappe.auth.get_logged_user",
-  requestOptions
-)
+fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .then((response) => {
     if (!response.ok) {
       // error 403
@@ -150,8 +159,8 @@ const errors = reactive({
 
 // Form Validation Function
 const validateForm = () => {
-  errors.username = form.value.username ? null : "يرجى إدخال اسم المستخدم.";
-  errors.password = form.value.password ? null : "يرجى إدخال كلمة المرور.";
+  errors.username = form.value.username ? null : t("Please enter your ID.");
+  errors.password = form.value.password ? null : t("Please enter a password.");
 
   return !errors.username && !errors.password;
 };
@@ -175,12 +184,12 @@ const handleLogin = async () => {
     );
 
     if (response.data.message.status !== "fail") {
-      showToastMessage("تم تسجيل الدخول بنجاح!", toastMessage, showToast);
+      showToastMessage(t("Logged in Successfully"), toastMessage, showToast);
       loading.value = false;
       navigate.replace("/home"); // Redirect to the profile page after login
     } else {
       showToastMessage(
-        "خطأ: " + response.data.message,
+        t("Error:") + response.data.message.message,
         toastMessage,
         showToast
       ); // Display error message
@@ -190,17 +199,15 @@ const handleLogin = async () => {
     loading.value = false;
     if (error.response && error.response.data) {
       // Handling specific API error response
-      if (
-        error.response.data.message.message === "Invalid email or password."
-      ) {
+      if (error.response.data.message.message.includes("or password")) {
         showToastMessage(
-          "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+          t("ID or password is incorrect."),
           toastMessage,
           showToast
         );
       } else {
         showToastMessage(
-          "حدث خطأ غير متوقع. حاول مرة أخرى لاحقًا.",
+          t("An unexpected error occurred. Please try again later."),
           toastMessage,
           showToast
         );
@@ -208,24 +215,19 @@ const handleLogin = async () => {
     } else {
       // Handling generic network error
       showToastMessage(
-        "فشل الاتصال بالخادم. يرجى التحقق من الاتصال بالإنترنت.",
+        t(
+          "Failed to connect to the server. Please check your internet connection."
+        ),
         toastMessage,
         showToast
       );
     }
   }
 };
-
-
 </script>
 
 <style scoped>
 input {
   background: #f0f0f0;
-}
-
-.rtl {
-  direction: rtl;
-  text-align: right;
 }
 </style>

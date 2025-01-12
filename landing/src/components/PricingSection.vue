@@ -12,16 +12,13 @@
         class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
       >
         <h3 class="text-2xl font-bold -mb-4">
-          {{ $t("PackagesSection.SafeLife.title") }}
+          {{ $t("Golden.title") }}
         </h3>
-        <h2 class="price text-6xl font-light">
-          {{ $t("PackagesSection.SafeLife.price") }}
+        <h2 class="price text-4xl font-light">
+          {{ $t("Golden.price") }}
         </h2>
         <p class="font-semibold text-2xl -mt-4">
           {{ $t("PackagesSection.SafeLife.duration") }}
-        </p>
-        <p class="text-sm text-center font-black">
-          {{ $t("PackagesSection.SafeLife.targetAudience") }}
         </p>
         <div class="price-notes flex flex-col gap-2 w-full text-center">
           <hr class="bg-white w-full" />
@@ -31,322 +28,169 @@
               {{ $t("PackagesSection.SafeLife.languages") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.SafeLife.cons") }}
+            {{ $t("PackagesSection.General.cons") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.SafeLife.consultationHours") }}
+              {{ $t("Golden.consultations") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.SafeLife.supp") }}
+            {{ $t("Golden.personalCase") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.SafeLife.supportHours") }}
+              {{ $t("Golden.personal") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.SafeLife.famCase") }}
+            {{ $t("Golden.labCase") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.SafeLife.familyCases") }}
+              {{ $t("Golden.labor") }}
             </span>
           </p>
+
           <hr class="bg-white w-full" />
         </div>
         <div
           class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
         >
-          <button
+          <a
             class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
+            href="https://portal.lsc-sa.net/dashboard/signup"
           >
             {{ $t("Subscribe") }}
-          </button>
+          </a>
+          <a
+            class="text-white font-bold py-2 px-4 rounded w-1/2 btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
+            href="https://portal.lsc-sa.net/dashboard"
+          >
+            {{ $t("Early Register") }}
+          </a>
         </div>
       </div>
       <div
         class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
       >
         <h3 class="text-2xl font-bold -mb-4">
-          {{ $t("PackagesSection.Profession.name") }}
+          {{ $t("Silver.title") }}
         </h3>
-        <h2 class="price text-6xl font-light">-</h2>
+        <h2 class="price text-4xl font-light">
+          {{ $t("Silver.price") }}
+        </h2>
         <p class="font-semibold text-2xl -mt-4">
-          {{ $t("PackagesSection.Profession.membership_type") }}
-        </p>
-        <p class="text-sm text-center font-black">
-          {{ $t("PackagesSection.Profession.target_category") }}
+          {{ $t("PackagesSection.SafeLife.duration") }}
         </p>
         <div class="price-notes flex flex-col gap-2 w-full text-center">
           <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.Profession.lang") }}
+            {{ $t("PackagesSection.SafeLife.lang") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Profession.languages") }}
+              {{ $t("PackagesSection.SafeLife.languages") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.Profession.cons") }}
+            {{ $t("PackagesSection.General.cons") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Profession.consultations") }}
+              {{ $t("Silver.consultations") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.Profession.supp") }}
+            {{ $t("Silver.personalCase") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Profession.support_and_assistance") }}
+              {{ $t("Silver.personal") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
+                    <hr class="bg-white w-full" />
           <p>
-            {{ $t("PackagesSection.Profession.labCase") }}
+            {{ $t("Silver.labCase") }}
             <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Profession.labor_issues") }}
+              {{ $t("Silver.labor") }}
             </span>
           </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.Profession.profCase") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Profession.professional_issues") }}
-            </span>
-          </p>
+
           <hr class="bg-white w-full" />
         </div>
         <div
           class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
         >
-          <button
+          <a
             class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
+            href="https://portal.lsc-sa.net/dashboard/signup"
           >
             {{ $t("Subscribe") }}
-          </button>
-        </div>
-      </div>
-      <div
-        class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
-      >
-        <h3 class="text-2xl font-bold -mb-4">
-          {{ $t("PackagesSection.Reassured.name") }}
-        </h3>
-        <h2 class="price text-6xl font-light">-</h2>
-        <p class="font-semibold text-2xl -mt-4">
-          {{ $t("PackagesSection.Reassured.membership_type") }}
-        </p>
-        <p class="text-sm text-center font-black">
-          {{ $t("PackagesSection.Reassured.target_category") }}
-        </p>
-        <div class="price-notes flex flex-col gap-2 w-full text-center">
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.Reassured.lang") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Reassured.languages") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.Reassured.cons") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Reassured.consultations") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.Reassured.supp") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Reassured.support_and_assistance") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.Reassured.labCase") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.Reassured.labor_issues") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-        </div>
-        <div
-          class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
-        >
-          <button
-            class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
+          </a>
+          <a
+            class="text-white font-bold py-2 px-4 rounded w-1/2 btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
+            href="https://portal.lsc-sa.net/dashboard"
           >
-            {{ $t("Subscribe") }}
-          </button>
+            {{ $t("Early Register") }}
+          </a>
         </div>
       </div>
       <div
-        class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
-      >
-        <h3 class="text-2xl font-bold -mb-4">
-          {{ $t("PackagesSection.safetyA.name") }}
-        </h3>
-        <h2 class="price text-6xl font-light">-</h2>
-        <p class="font-semibold text-2xl -mt-4">
-          {{ $t("PackagesSection.safetyA.membership_type") }}
-        </p>
-        <p class="text-sm text-center font-black">
-          {{ $t("PackagesSection.safetyA.target_category") }}
-        </p>
-        <div class="price-notes flex flex-col gap-2 w-full text-center">
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyA.lang") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyA.languages") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyA.cons") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyA.consultations") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyA.supp") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyA.support_and_assistance") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyA.labCase") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyA.labor_issues") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyA.civCriCase") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyA.civil_or_criminal_case") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-        </div>
-        <div
-          class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
-        >
-          <button
-            class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
-          >
-          {{ $t("Subscribe") }}
-          </button>
-        </div>
-      </div>
-      <div
-        class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
-      >
+      class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
+    >
       <h3 class="text-2xl font-bold -mb-4">
-        {{ $t("PackagesSection.safetyB.name") }}
+        {{ $t("Bronze.title") }}
       </h3>
-      <h2 class="price text-6xl font-light">-</h2>
+      <h2 class="price text-4xl font-light">
+        {{ $t("Bronze.price") }}
+      </h2>
       <p class="font-semibold text-2xl -mt-4">
-        {{ $t("PackagesSection.safetyB.membership_type") }}
-      </p>
-      <p class="text-sm text-center font-black">
-        {{ $t("PackagesSection.safetyB.target_category") }}
+        {{ $t("PackagesSection.SafeLife.duration") }}
       </p>
       <div class="price-notes flex flex-col gap-2 w-full text-center">
         <hr class="bg-white w-full" />
         <p>
-          {{ $t("PackagesSection.safetyB.lang") }}
+          {{ $t("PackagesSection.SafeLife.lang") }}
           <span class="text-primary text-lg font-bold me-2">
-            {{ $t("PackagesSection.safetyB.languages") }}
+            {{ $t("PackagesSection.SafeLife.languages") }}
           </span>
         </p>
-        <hr class="bg-white w-full" />
+                  <hr class="bg-white w-full" />
         <p>
-          {{ $t("PackagesSection.safetyB.cons") }}
+          {{ $t("PackagesSection.General.cons") }}
           <span class="text-primary text-lg font-bold me-2">
-            {{ $t("PackagesSection.safetyB.consultations") }}
+            {{ $t("Bronze.consultations") }}
           </span>
         </p>
-        <hr class="bg-white w-full" />
+                  <hr class="bg-white w-full" />
         <p>
-            {{ $t("PackagesSection.safetyB.supp") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyB.support_and_assistance") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-          <p>
-            {{ $t("PackagesSection.safetyB.labCase") }}
-            <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyB.labor_issues") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-        </div>
-        <div
-          class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
-        >
-          <button
-            class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
-          >
-          {{ $t("Subscribe") }}
-          </button>
-        </div>
+          {{ $t("Bronze.personalCase") }}
+          <span class="text-primary text-lg font-bold me-2">
+            {{ $t("Bronze.personal") }}
+          </span>
+        </p>
+                  <hr class="bg-white w-full" />
+        <p>
+          {{ $t("Bronze.labCase") }}
+          <span class="text-primary text-lg font-bold me-2">
+            {{ $t("Bronze.labor") }}
+          </span>
+        </p>
+
+        <hr class="bg-white w-full" />
       </div>
       <div
-        class="pricing-card max-w-80 lg:min-w-80 flex flex-col justify-between gap-4 px-16 py-8 items-center bg-white rounded-md mt-8 hover:scale-105 duration-500"
+        class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
       >
-      <h3 class="text-2xl font-bold -mb-4">
-        {{ $t("PackagesSection.safetyC.name") }}
-      </h3>
-      <h2 class="price text-6xl font-light">-</h2>
-      <p class="font-semibold text-2xl -mt-4">
-        {{ $t("PackagesSection.safetyC.membership_type") }}
-      </p>
-      <p class="text-sm text-center font-black">
-        {{ $t("PackagesSection.safetyC.target_category") }}
-      </p>
-      <div class="price-notes flex flex-col gap-2 w-full text-center">
-        <hr class="bg-white w-full" />
-        <p>
-          {{ $t("PackagesSection.safetyC.lang") }}
-          <span class="text-primary text-lg font-bold me-2">
-            {{ $t("PackagesSection.safetyC.languages") }}
-          </span>
-        </p>
-        <hr class="bg-white w-full" />
-        <p>
-          {{ $t("PackagesSection.safetyC.cons") }}
-          <span class="text-primary text-lg font-bold me-2">
-            {{ $t("PackagesSection.safetyC.consultations") }}
-          </span>
-        </p>
-        <hr class="bg-white w-full" />
-        <p>
-          {{ $t("PackagesSection.safetyC.supp") }}
-          <span class="text-primary text-lg font-bold me-2">
-              {{ $t("PackagesSection.safetyC.support_and_assistance") }}
-            </span>
-          </p>
-          <hr class="bg-white w-full" />
-        </div>
-        <div
-          class="pri-btns flex flex-col gap-4 items-center justify-center w-full"
+        <a
+          class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
+          href="https://portal.lsc-sa.net/dashboard"
         >
-          <button
-            class="text-white font-bold py-2 px-4 rounded w-full btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
-            onclick="my_modal_2.showModal()"
-          >
           {{ $t("Subscribe") }}
-          </button>
-        </div>
+        </a>
+        <a
+          class="text-white font-bold py-2 px-4 rounded w-1/2 btn bg-primary border-primary hover:bg-emerald-600 hover:border-emerald-600"
+          href="https://portal.lsc-sa.net/dashboard"
+        >
+          {{ $t("Early Register") }}
+        </a>
       </div>
+    </div>
     </div>
   </section>
 </template>

@@ -5,6 +5,7 @@
   >
     <div class="navbar lg:w-4/5 mx-auto">
       <div class="navbar-start">
+        <LanguageSelect class="mx-4 hidden lg:block" />
         <div class="dropdown inline-block lg:hidden">
           <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
             <svg
@@ -41,20 +42,11 @@
             <li>
               <a href="#contact">{{ $t("Contact") }} </a>
             </li>
-            <button
-              class="btn font-semibold bg-primary text-white"
-              onclick="my_modal_2.showModal()"
-            >
-              {{ $t("Signup") }}
-            </button>
+            <li>
+              <LanguageSelect class="mx-4" />
+            </li>
           </ul>
         </div>
-        <button
-          class="btn font-semibold border-0 bg-primary hidden lg:block hover:bg-primaryHover text-white"
-          onclick="my_modal_2.showModal()"
-        >
-          {{ $t("Signup") }}
-        </button>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1 flex-row-reverse">
@@ -76,7 +68,6 @@
         </ul>
       </div>
       <div class="navbar-end">
-        <LanguageSelect class="mx-4" />
         <RouterLink to="/" class="btn btn-ghost">
           <img
             src="../assets/images/logo.png"
@@ -283,7 +274,7 @@
   <!-- الشروط والاحكام -->
   <dialog
     id="my_modal_1"
-    class="modal"
+    class="modal text-black"
     :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
   >
     <div class="modal-box" v-if="$i18n.locale == 'ar'">
@@ -930,6 +921,447 @@
       </div>
     </div>
   </dialog>
+  <!-- سياسة الاستفسارات -->
+  <dialog
+    id="my_modal_11"
+    class="modal"
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+  >
+    <div class="modal-box" v-if="$i18n.locale == 'ar'">
+      <div class="modal-action my-0 justify-start">
+        <form method="dialog">
+          <button class="btn">
+            <font-awesome-icon icon="fa-solid fa-x" />
+          </button>
+        </form>
+      </div>
+      <h3 class="text-lg font-bold text-center pb-2">الشكاوى والاستفسارات</h3>
+      <div
+        class="p-6 px-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto text-black"
+      >
+        <!-- Modal Header -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          سياسة الإجابة على الاستفسارات ومعالجة الشكاوى
+        </h2>
+
+        <!-- Introduction -->
+        <p class="mb-4">
+          تهدف هذه السياسة إلى تنظيم عملية التعامل مع استفسارات وشكاوى العملاء
+          لضمان تقديم خدمة عالية الجودة والاستجابة الفعالة.
+        </p>
+
+        <!-- استقبال الاستفسارات والشكاوى -->
+        <h3 class="text-lg font-semibold mb-2">
+          استقبال الاستفسارات والشكاوى:
+        </h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>يمكن تقديم الاستفسارات والشكاوى عبر:</li>
+          <li>
+            الموقع الإلكتروني:
+            <a href="https://portal.lsc-sa.net/" class="text-blue-500 underline"
+              >https://portal.lsc-sa.net/</a
+            >
+          </li>
+          <li>
+            البريد الإلكتروني:
+            <a href="mailto:info@lsc-sa.net" class="text-blue-500 underline"
+              >info@lsc-sa.net</a
+            >
+          </li>
+          <li>الهاتف المخصص لخدمة العملاء: 055-955-7313</li>
+        </ul>
+
+        <!-- معالجة الشكاوى -->
+        <h3 class="text-lg font-semibold mb-2">معالجة الشكاوى:</h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            يتم التحقيق في الشكوى بواسطة الفريق المختص لضمان تحليلها بشكل عادل
+            ومحايد.
+          </li>
+          <li>
+            يتم التواصل مع العميل خلال فترة التحقيق لتزويده بتحديثات عن حالة
+            الشكوى.
+          </li>
+          <li>يتم توفير حلول مناسبة لكل شكوى بناءً على نتائج التحقيق.</li>
+        </ul>
+
+        <!-- مراقبة الجودة والتقييم -->
+        <h3 class="text-lg font-semibold mb-2">مراقبة الجودة والتقييم:</h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            يتم مراجعة الشكاوى والاستفسارات بانتظام لتحسين العمليات وتعزيز جودة
+            الخدمة.
+          </li>
+          <li>
+            يتم تقييم مستوى رضا العملاء بعد حل كل شكوى لضمان تحسين مستوى الخدمة
+            في المستقبل.
+          </li>
+        </ul>
+
+        <!-- السرية والخصوصية -->
+        <h3 class="text-lg font-semibold mb-2">السرية والخصوصية:</h3>
+        <p class="mb-4">
+          يتم التعامل مع جميع الاستفسارات والشكاوى بسرية تامة، وتتعهد الشركة
+          بعدم مشاركة معلومات المستهلكين مع أي طرف ثالث دون إذن مسبق.
+        </p>
+
+        <p class="mb-4">
+          هذه السياسة تهدف إلى تعزيز ثقة العملاء في الشركة وضمان الشفافية في
+          التعامل مع استفساراتهم وشكاويهم.
+        </p>
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">إغلاق</button>
+        </form>
+      </div>
+    </div>
+    <div class="modal-box" v-else>
+      <div class="modal-action my-0 justify-start">
+        <form method="dialog">
+          <button class="btn">
+            <font-awesome-icon icon="fa-solid fa-x" />
+          </button>
+        </form>
+      </div>
+      <h3 class="text-lg font-bold text-center pb-2">
+        Complaints and Inquiries
+      </h3>
+      <div
+        class="p-6 px-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto text-black"
+      >
+        <!-- Modal Header -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          Inquiry Response and Complaint Handling Policy
+        </h2>
+
+        <!-- Introduction -->
+        <p class="mb-4">
+          This policy aims to organize the handling of customer inquiries and
+          complaints to ensure high-quality service and effective responses.
+        </p>
+
+        <!-- Receiving Inquiries and Complaints -->
+        <h3 class="text-lg font-semibold mb-2">
+          Receiving Inquiries and Complaints:
+        </h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>Inquiries and complaints can be submitted via:</li>
+          <li>
+            Website:
+            <a href="https://portal.lsc-sa.net/" class="text-blue-500 underline"
+              >https://portal.lsc-sa.net/</a
+            >
+          </li>
+          <li>
+            Email:
+            <a href="mailto:info@lsc-sa.net" class="text-blue-500 underline"
+              >info@lsc-sa.net</a
+            >
+          </li>
+          <li>Dedicated customer service phone: 055-955-7313</li>
+        </ul>
+
+        <!-- Handling Complaints -->
+        <h3 class="text-lg font-semibold mb-2">Handling Complaints:</h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            The complaint will be investigated by the specialized team to ensure
+            it is analyzed fairly and impartially.
+          </li>
+          <li>
+            The customer will be contacted during the investigation period to
+            provide updates on the status of the complaint.
+          </li>
+          <li>
+            Suitable solutions will be provided for each complaint based on the
+            investigation results.
+          </li>
+        </ul>
+
+        <!-- Quality Monitoring and Evaluation -->
+        <h3 class="text-lg font-semibold mb-2">
+          Quality Monitoring and Evaluation:
+        </h3>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            Complaints and inquiries are regularly reviewed to improve processes
+            and enhance service quality.
+          </li>
+          <li>
+            Customer satisfaction is evaluated after resolving each complaint to
+            ensure future service improvements.
+          </li>
+        </ul>
+
+        <!-- Confidentiality and Privacy -->
+        <h3 class="text-lg font-semibold mb-2">Confidentiality and Privacy:</h3>
+        <p class="mb-4">
+          All inquiries and complaints are handled with complete
+          confidentiality, and the company commits to not sharing consumer
+          information with any third party without prior consent.
+        </p>
+
+        <p class="mb-4">
+          This policy aims to enhance customer trust in the company and ensure
+          transparency in handling their inquiries and complaints.
+        </p>
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">Close</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+  <!-- سياسة الاسترجاع -->
+  <dialog
+    id="my_modal_12"
+    class="modal"
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+  >
+    <div class="modal-box" v-if="$i18n.locale == 'ar'">
+      <div class="modal-action my-0 justify-start">
+        <form method="dialog">
+          <button class="btn">
+            <font-awesome-icon icon="fa-solid fa-x" />
+          </button>
+        </form>
+      </div>
+      <h3 class="text-lg font-bold text-center pb-2">
+        سياسة الاستبدال والإرجاع
+      </h3>
+      <div
+        class="p-6 px-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto text-black"
+      >
+        <!-- Policy Scope -->
+        <h2 class="text-xl font-semibold mb-4 text-center">1. نطاق السياسة</h2>
+        <p class="mb-4">
+          تنطبق هذه السياسة على جميع الخدمات القانونية المقدمة عبر الموقع بنظام
+          الباقات السنوية. يتوجب على العملاء قراءة هذه السياسة قبل الاشتراك في
+          أي من خدماتنا.
+        </p>
+
+        <!-- Cancellation and Refund -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          2. الإلغاء والاسترجاع
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            يمكن للعميل طلب إلغاء الاشتراك في الباقة السنوية خلال فترة 7 أيام من
+            تاريخ الدفع الأولي، شرط عدم الاستفادة من أي من الخدمات القانونية
+            المقدمة ضمن الباقة.
+          </li>
+          <li>
+            في حالة طلب الإلغاء خلال فترة السماح، سيتم رد المبلغ المدفوع بالكامل
+            بعد خصم أي رسوم إدارية أو مصرفية.
+          </li>
+          <li>
+            إذا تم تقديم أي من الخدمات القانونية خلال فترة الإلغاء، لا يحق
+            للعميل المطالبة برد المبلغ كاملاً، ويتم خصم قيمة الخدمات التي تم
+            تقديمها بناءً على السعر المنفصل لكل خدمة.
+          </li>
+        </ul>
+
+        <!-- Replacement -->
+        <h2 class="text-xl font-semibold mb-4 text-center">3. الاستبدال</h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            يمكن للعميل طلب استبدال الباقة بخدمة أخرى أو ترقية/تخفيض الباقة خلال
+            أول 30 يومًا من الاشتراك، على أن يتم تسوية الفروق المالية بين
+            الباقات.
+          </li>
+          <li>
+            في حالة استبدال الباقة، يتم حساب أي فروقات مالية، ويُطلب من العميل
+            دفع الفارق (في حال الترقية)، أو استرداد الفارق (في حال التخفيض).
+          </li>
+        </ul>
+
+        <!-- Non-Refundable Services -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          4. الخدمات غير القابلة للاسترجاع
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            أي خدمات قانونية يتم تقديمها بشكل فوري مثل الاستشارات، إعداد الوثائق
+            القانونية، أو تقديم المذكرات، لا تكون قابلة للاسترجاع أو الاستبدال
+            بعد تقديم الخدمة.
+          </li>
+          <li>باقات الاشتراك المنتهية لا تكون قابلة للاسترجاع أو التمديد.</li>
+        </ul>
+
+        <!-- Return or Replacement Request Process -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          5. آلية طلب الإرجاع أو الاستبدال
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            يجب تقديم طلب الإرجاع أو الاستبدال عبر البريد الإلكتروني الرسمي أو
+            من خلال حساب العميل في الموقع.
+          </li>
+          <li>
+            يتعين على العميل توضيح سبب طلب الإرجاع أو الاستبدال مع تقديم ما يثبت
+            عدم الاستفادة من الخدمات (إن أمكن).
+          </li>
+        </ul>
+
+        <!-- Processing Time -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          6. الوقت المستغرق لمعالجة الطلبات
+        </h2>
+        <p class="mb-4">
+          يتم معالجة طلبات الإلغاء، الاسترجاع أو الاستبدال في غضون 10 أيام عمل
+          من تاريخ استلام الطلب.
+        </p>
+
+        <!-- Exceptions -->
+        <h2 class="text-xl font-semibold mb-4 text-center">7. استثناءات</h2>
+        <p class="mb-4">
+          تحتفظ الشركة بالحق في رفض أي طلب استرجاع أو استبدال في حالة وجود سوء
+          استخدام أو خرق لشروط الخدمة من قبل العميل.
+        </p>
+
+        <!-- Policy Modifications -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          8. التعديلات على السياسة
+        </h2>
+        <p class="mb-4">
+          تحتفظ الشركة بحق تعديل هذه السياسة في أي وقت، وسيتم إخطار العملاء بأي
+          تغييرات جوهرية من خلال الموقع.
+        </p>
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">إغلاق</button>
+        </form>
+      </div>
+    </div>
+    <div class="modal-box" v-else>
+      <div class="modal-action my-0 justify-start">
+        <form method="dialog">
+          <button class="btn">
+            <font-awesome-icon icon="fa-solid fa-x" />
+          </button>
+        </form>
+      </div>
+      <h3 class="text-lg font-bold text-center pb-2">
+        Return and Exchange Policy
+      </h3>
+      <div
+        class="p-6 px-8 bg-white rounded-lg shadow-lg max-w-3xl mx-auto text-black"
+      >
+        <!-- Policy Scope -->
+        <h2 class="text-xl font-semibold mb-4 text-center">1. Policy Scope</h2>
+        <p class="mb-4">
+          This policy applies to all legal services provided through the site
+          under annual package subscriptions. Customers are required to read
+          this policy before subscribing to any of our services.
+        </p>
+
+        <!-- Cancellation and Refund -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          2. Cancellation and Refund
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            The customer may request to cancel their annual subscription within
+            7 days from the date of the initial payment, provided no legal
+            services included in the package have been utilized.
+          </li>
+          <li>
+            If cancellation is requested during the grace period, the full
+            amount paid will be refunded after deducting any administrative or
+            banking fees.
+          </li>
+          <li>
+            If any legal services were provided during the cancellation period,
+            the customer is not entitled to a full refund, and the cost of the
+            services provided will be deducted based on the separate price for
+            each service.
+          </li>
+        </ul>
+
+        <!-- Replacement -->
+        <h2 class="text-xl font-semibold mb-4 text-center">3. Replacement</h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            The customer may request to replace their package with another
+            service or upgrade/downgrade their package within the first 30 days
+            of subscription, with any financial differences settled between the
+            packages.
+          </li>
+          <li>
+            In the case of package replacement, any financial differences will
+            be calculated, and the customer will be required to pay the
+            difference (in case of an upgrade) or receive a refund of the
+            difference (in case of a downgrade).
+          </li>
+        </ul>
+
+        <!-- Non-Refundable Services -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          4. Non-Refundable Services
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            Any legal services provided immediately, such as consultations,
+            preparation of legal documents, or submission of briefs, are not
+            refundable or exchangeable after the service is rendered.
+          </li>
+          <li>
+            Expired subscription packages are not refundable or extendable.
+          </li>
+        </ul>
+
+        <!-- Return or Replacement Request Process -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          5. Return or Replacement Request Process
+        </h2>
+        <ul class="list-decimal pl-5 mb-4">
+          <li>
+            Requests for returns or replacements must be submitted via the
+            official email or through the customer account on the site.
+          </li>
+          <li>
+            The customer must clarify the reason for the return or replacement
+            request and provide proof of non-utilization of services (if
+            possible).
+          </li>
+        </ul>
+
+        <!-- Processing Time -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          6. Processing Time
+        </h2>
+        <p class="mb-4">
+          Cancellation, refund, or replacement requests will be processed within
+          10 business days from the date of receipt of the request.
+        </p>
+
+        <!-- Exceptions -->
+        <h2 class="text-xl font-semibold mb-4 text-center">7. Exceptions</h2>
+        <p class="mb-4">
+          The company reserves the right to refuse any return or replacement
+          request in cases of misuse or violation of the terms of service by the
+          customer.
+        </p>
+
+        <!-- Policy Modifications -->
+        <h2 class="text-xl font-semibold mb-4 text-center">
+          8. Policy Modifications
+        </h2>
+        <p class="mb-4">
+          The company reserves the right to modify this policy at any time and
+          will notify customers of any significant changes through the website.
+        </p>
+      </div>
+      <div class="modal-action">
+        <form method="dialog">
+          <button class="btn">Close</button>
+        </form>
+      </div>
+    </div>
+  </dialog>
 </template>
 
 <style scoped>
@@ -1328,7 +1760,11 @@ const handleSubmit = async () => {
 
     if (locale.value === "ar") {
       if (response.data.message.status !== "fail") {
-        showToastMessage("تم تسجيل بنجاح، سيتم التواصل معك قريباً.", toastMessage, showToast);
+        showToastMessage(
+          "تم تسجيل بنجاح، سيتم التواصل معك قريباً.",
+          toastMessage,
+          showToast
+        );
         loading.value = false;
       } else {
         showToastMessage(

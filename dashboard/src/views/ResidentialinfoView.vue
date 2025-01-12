@@ -1,13 +1,18 @@
 <template>
-  <LoggedInTopNav title="معلومات الإقامة" :backArrow="true" />
-  <div class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24">
+  <LoggedInTopNav :title="t('Residence Information')" :backArrow="true" />
+  <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24"
+  >
     <div
       class="card article bg-white rounded-box flex-grow px-4 py-10 gap-10 shadow-md"
     >
       <!-- Form to handle data submission -->
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
         <div class="flex flex-col gap-4">
-          <h2 class="font-bold text-lg">معلومات الإقامة</h2>
+          <h2 class="font-bold text-lg">
+            {{ $t("Residence Information") }}
+          </h2>
           <!-- Image Display and Upload -->
           <div
             class="relative flex justify-center"
@@ -38,7 +43,9 @@
             <!-- Input Fields -->
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">مقر إقامة الكفيل</span>
+                <span class="label-text">
+                  {{ $t("Sponsor's Residence") }}
+                </span>
               </div>
               <input
                 type="text"
@@ -49,18 +56,32 @@
             </label>
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">مدينة العمل</span>
+                <span class="label-text">
+                  {{ $t("City of Work") }}
+                </span>
               </div>
-              <input
-                type="text"
-                class="input input-bordered bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
-                v-model="userData.custom_work_city"
+              <select
+                class="select select-bordered w-full select-sm bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
+                id="job"
                 :disabled="!allowEdit"
-              />
+                v-model="userData.custom_work_city"
+              >
+                <option :value="userData.custom_work_city">
+                  {{ userData.custom_work_city }}
+                </option>
+                <option
+                  v-for="territory in territories"
+                  :value="territory.name"
+                >
+                  {{ territory.territory_name }}
+                </option>
+              </select>
             </label>
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text"> الراتب</span>
+                <span class="label-text">
+                  {{ $t("Salary") }}
+                </span>
               </div>
               <input
                 type="tel"
@@ -71,15 +92,20 @@
             </label>
           </div>
           <!-- The button to open modal for job contract-->
-          <label for="my_modal_7" class="btn btn-primary text-white">
-            عرض عقد العمل
+          <label
+            for="my_modal_7"
+            class="btn btn-primary text-white border-white bg-primary text-white"
+          >
+            {{ $t("View Employment Contract") }}
           </label>
 
           <!-- Put this part before </body> tag -->
           <input type="checkbox" id="my_modal_7" class="modal-toggle" />
           <div class="modal" role="dialog">
             <div class="modal-box flex flex-col gap-2 justify-center">
-              <h3 class="text-lg font-bold text-center">عقد العمل</h3>
+              <h3 class="text-lg font-bold text-center">
+                {{ $t("Employment Contract") }}
+              </h3>
               <div
                 class="relative"
                 @click="allowEdit ? triggerFileInput() : null"
@@ -108,12 +134,12 @@
                   @change="handleFileChange"
                 />
               </div>
-              <a
+              <!-- <a
                 class="btn btn-ghost btn-xs"
                 :href="userData.custom_job_contract"
                 download
                 >تحميل</a
-              >
+              > -->
             </div>
             <label class="modal-backdrop" for="my_modal_7"> </label>
           </div>
@@ -124,26 +150,29 @@
           type="submit"
           :class="allowEdit ? '' : ' hidden'"
         >
-          حفظ التغييرات
+          {{ $t("Save Changes") }}
         </button>
         <button
-          class="btn btn-primary text-white w-full max-w-40 self-center"
+          class="btn btn-primary text-white border-white bg-primary text-white w-full max-w-40 self-center"
           @click.prevent="toggleDisable"
           :class="allowEdit ? 'bg-danger' : ''"
         >
-          {{ allowEdit ? "تراجع" : "تعديل" }}
+          {{ allowEdit ? $t("Undo") : $t("Edit") }}
         </button>
       </form>
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import id_face from "@/assets/images/id_front.png";
@@ -166,11 +195,11 @@ const triggerFileInputIqama = () => {
 };
 
 const userData = ref({
-  custom_kafeel_address: null,
+  custom_kafeel_address: "",
   custom_salary: 0.0,
-  custom_work_city: null,
-  custom_job_contract: null,
-  custom_iqama_image: null,
+  custom_work_city: "",
+  custom_job_contract: "",
+  custom_iqama_image: "",
 });
 
 const allowEdit = ref(false);
@@ -195,6 +224,7 @@ const getUserData = async () => {
 
 const toggleDisable = () => {
   allowEdit.value = !allowEdit.value;
+  if (!allowEdit.value) getUserData();
 };
 
 // Handle file change and store the file in userData
@@ -216,6 +246,26 @@ const handleFileChangeIqama = (event) => {
   reader.readAsDataURL(file);
 };
 
+const territories = ref([]);
+
+function fetchTerritories() {
+  fetch(
+    `/api/method/lsc_api.lsc_api.get_linked_data.get_work_cities?lang=${locale.value}`,
+    { method: "GET" }
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch territories.");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      territories.value = data.message.work_city;
+    })
+    .catch((error) => {
+      console.error("Error fetching territories:", error);
+    });
+}
 // Handle form submission
 const handleSubmit = async () => {
   loading.value = true;
@@ -242,7 +292,6 @@ const handleSubmit = async () => {
       }
     );
     const data = await response.json();
-    console.log(data);
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
@@ -257,6 +306,7 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   getUserData();
+  fetchTerritories();
 });
 </script>
 

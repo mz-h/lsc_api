@@ -15,6 +15,17 @@ def update_user_data(**kwargs):
             limit=1,
         )
 
+        customer_data = frappe.get_all(
+            "Customer",
+            filters={"custom_user": email},
+            fields=["name"],
+            limit=1,
+        )
+
+        account_page = frappe.get_doc(
+            "Account Status Page", {"client": customer_data[0].name}
+        )
+
         if not user_data:
             return {"status": "error", "message": "User not found"}
 
@@ -25,7 +36,7 @@ def update_user_data(**kwargs):
             "birth_date",
             "location",
             "user_image",
-            "language"
+            "language",
         ]
         if frappe.request.files.get("user_image"):
             file = frappe.request.files.get("user_image")
@@ -34,19 +45,19 @@ def update_user_data(**kwargs):
 
         for field in user_fields:
             if field in kwargs:
+                if field == "null":
+                    field = None
                 frappe.db.set_value("User", user_email, field, kwargs[field])
+
+                if field in ["location", "birth_date"]:
+                    frappe.db.set_value(
+                        "Account Status Page", account_page.name, field, kwargs[field]
+                    )
 
         if "new_password" in kwargs:
             update_password(user_email, kwargs["new_password"])
 
         frappe.db.commit()
-
-        customer_data = frappe.get_all(
-            "Customer",
-            filters={"custom_user": email},
-            fields=["name"],
-            limit=1,
-        )
 
         if customer_data:
             customer_name = customer_data[0].name
@@ -64,6 +75,14 @@ def update_user_data(**kwargs):
                     file_url = save_file_to_field("Customer", customer_name, file)
                     frappe.db.set_value("Customer", customer_name, field, file_url)
 
+                    if field in ["custom_customer_ssn_photo", "custom_iqama_image"]:
+                        frappe.db.set_value(
+                            "Account Status Page",
+                            account_page.name,
+                            field,
+                            file_url,
+                        )
+
             customer_fields = [
                 "custom_id_number",
                 "custom_ksa_entering_date",
@@ -77,7 +96,21 @@ def update_user_data(**kwargs):
 
             for field in customer_fields:
                 if field in kwargs:
+                    if field == "null":
+                        field = None
+
                     frappe.db.set_value("Customer", customer_name, field, kwargs[field])
+                    if field in [
+                        "custom_passport_number",
+                        "custom_nationality",
+                        "custom_work_city",
+                    ]:
+                        frappe.db.set_value(
+                            "Account Status Page",
+                            account_page.name,
+                            field,
+                            kwargs[field],
+                        )
 
         frappe.db.commit()
 

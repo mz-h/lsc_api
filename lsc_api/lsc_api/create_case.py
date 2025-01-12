@@ -12,8 +12,8 @@ def create_case(**kwargs):
     poa_expire_date = None
     case_name = kwargs.get("name")
     title = kwargs.get("title")
-    department = kwargs.get("department")
-    
+    case_description = kwargs.get("case_description")
+
     customer = frappe.get_doc("Customer", {"custom_user": user})
 
     client_transaction = frappe.new_doc("Client Transaction")
@@ -29,7 +29,7 @@ def create_case(**kwargs):
     case.raised_at = datetime.now()
     case.client_transaction = client_transaction.name
     case.case_name = title
-    case.department = department
+    case.case_description = case_description
 
     case.save(ignore_permissions=True)
 
@@ -65,7 +65,8 @@ def create_case(**kwargs):
         "title": case.case_name,
         "department": case.department,
         "raised_at": case.raised_at,
-        "message": message if message else ""
+        "client_transaction": case.client_transaction,
+        "message": message if message else "",
     }
 
 

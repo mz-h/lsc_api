@@ -25,6 +25,30 @@ def get_countries(**kwargs):
         return {"status": "error", "message": f"Something went wrong: {str(e)}"}
 
 
+@frappe.whitelist(allow_guest=True)
+def get_branches(**kwargs):
+    lang = kwargs.get("lang", "ar")
+    frappe.local.lang = lang
+    try:
+        branches = frappe.get_all(
+            "Branch",
+            filters={"Disabled": 0},
+            fields=["name"],
+            order_by="name ASC",
+        )
+
+        for branch in branches:
+            branch["branch_name"] = _(branch["name"])
+
+        return {
+            "status": "success",
+            "branches": branches,
+        }
+
+    except Exception as e:
+        return {"status": "error", "message": f"Something went wrong: {str(e)}"}
+
+
 @frappe.whitelist(methods=["GET"])
 def get_work_cities(**kwargs):
     lang = kwargs.get("lang", "ar")
@@ -56,16 +80,15 @@ def get_legal_types():
     try:
         legal_types = frappe.get_all(
             "Legal Service Types",
-            fields=["legla_service_name"],
+            fields=["name", "legla_service_name"],
             order_by="legla_service_name ASC",
         )
-        legal_types_names = [
-            legal_type["legla_service_name"] for legal_type in legal_types
-        ]
+        for legal_type in legal_types:
+            legal_type["legla_service_name"] = _(legal_type["legla_service_name"])
 
         return {
             "status": "success",
-            "legal_types": legal_types_names,
+            "legal_types": legal_types,
         }
 
     except Exception as e:
@@ -85,25 +108,6 @@ def get_courts():
         return {
             "status": "success",
             "courts": court_names,
-        }
-
-    except Exception as e:
-        return {"status": "error", "message": f"Something went wrong: {str(e)}"}
-
-
-@frappe.whitelist(allow_guest=True)
-def get_branches():
-    try:
-        branches = frappe.get_all(
-            "Branch",
-            fields=["name"],
-            order_by="name ASC",
-        )
-        branch_names = [branch_name["name"] for branch_name in branches]
-
-        return {
-            "status": "success",
-            "branches": branch_names,
         }
 
     except Exception as e:

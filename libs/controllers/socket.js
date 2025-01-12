@@ -1,15 +1,14 @@
-// Authors: Faris Ansari <faris@frappe.io>
-
 import io from "socket.io-client";
 
 let host = window.location.hostname;
-let port = window.location.port ? ":9000" : "";
-let protocol = port ? "http" : "https";
+let port = "/lsc.psc-s.com";
+let protocol = window.location.protocol === "https:" ? "https" : "http";
 let url = `${protocol}://${host}${port}`;
-console.log(url);
+
 let socket = io(url, {
   withCredentials: true,
-  reconnectionAttempts: 5,
+  reconnectionAttempts: 3,
 });
 
+console.log(url, socket);
 export default socket;

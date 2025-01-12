@@ -625,19 +625,25 @@ def assign_employee_to_appointment(date):
     # Return or assign the selected employee for the appointment
     return employee_name
 
-@frappe.whitelist(allow_guest=True)
-def get_availability_data(date):
+@frappe.whitelist()
+def get_availability_data(date, item):
     date = getdate(date)
     weekday = date.strftime("%A")
-
     # Get all employees with a custom_employee_service_unit_schedule defined
-    employees = frappe.get_all("Employee", fields=["name", "employee_name"])
+    role = frappe.db.get_value("Create Appointment On", item,["role"])
+    branch = frappe.db.get_value("Customer", {"custom_user":frappe.session.user}, "custom_branch")
+    employees = frappe.db.sql("""
+            SELECT emp.name, emp.employee_name 
+            FROM `tabEmployee` emp
+            JOIN `tabHas Role` role ON role.parent = emp.user_id
+            WHERE emp.branch = %s AND role.role = %s
+        """, (branch, role), as_dict=True)
 
     if not employees:
         frappe.throw(_("No employees with a defined schedule found."), title=_("No Schedule Found"))
 
     # Dictionary to store availability details for each employee
-    availability_data = {}
+    availability_data = []
 
     for employee in employees:
         employee_doc = frappe.get_doc("Employee", employee['name'])
@@ -661,14 +667,48 @@ def get_availability_data(date):
             continue
         
         # Add the employee's availability details to the dictionary
-        availability_data = {"slot_details": slot_details}
+        availability_data.append({"slot_details": slot_details})
 
     if not availability_data:
         # If no employee is available for the given date
         frappe.throw(_("No employees are available on {0}").format(weekday), title=_("Not Available"))
-
+    
     # Return availability data for all employees
-    return availability_data
+    return refactor_availability_data(availability_data)
+
+
+def refactor_availability_data(availability_data):
+    response = {
+        "slot_details": [
+            {
+                    "slot_name": "Morning Shift",
+                    "avail_slot": [
+                        
+                    ],
+                    "appointments": [
+                        
+                    ],
+                    "allow_overlap": 0
+                }
+        ]
+    }
+    avail_slot = []
+    appointments = []
+
+    for row in availability_data:
+        for slot in row["slot_details"][0]["avail_slot"]:
+            if slot.from_time not in avail_slot:
+                response["slot_details"][0]["avail_slot"].append(slot)
+                avail_slot.append(slot.from_time)
+        for appointment in row["slot_details"][0]["appointments"]:
+            if appointment.appointment_time not in appointments:
+                response["slot_details"][0]["appointments"].append(appointment)
+                appointments.append(appointment.appointment_time)
+
+
+    return response
+
+
 
 def check_employee_wise_availability(date, employee_doc):
     employee = None

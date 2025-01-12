@@ -34,7 +34,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Parent Court",
-   "options": "Court"
+   "options": "Courts"
   },
   {
    "fieldname": "court_description",
@@ -68,7 +68,7 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Old Parent",
-   "options": "Court"
+   "options": "Courts"
   },
   {
    "fieldname": "attachments_section",
@@ -93,7 +93,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-09-15 11:44:07.452874",
+ "modified": "2024-12-03 16:57:22.331017",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Courts",

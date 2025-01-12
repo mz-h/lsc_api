@@ -13,7 +13,7 @@ def get_power_of_attorny():
     responses = frappe.get_all(
         "Power of Attornies",
         {"client": customer.name},
-        {"name", "lawyer", "attonery_number__najiz", "expiry_date", "attorney_content"},
+        {"name", "attonery_number__najiz", "expiry_date", "attorney_content"},
     )
 
     for response in responses:

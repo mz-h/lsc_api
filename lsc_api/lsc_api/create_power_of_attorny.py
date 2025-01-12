@@ -12,21 +12,25 @@ def create_power_of_attorny(**kwargs):
     else:
         return {"status": "fail", "message": "Customer not found"}
 
-    lawyer = kwargs.get("lawyer")
+    account_spage = frappe.get_all("Account Status Page", {"user": user}, "*")
+
     najiz_number = kwargs.get("attonery_number__najiz")
     expiry_date = kwargs.get("expiry_date")
     doc_content = kwargs.get("attorney_content")
 
-    if not frappe.db.exists("Employee", {"name": lawyer}):
-        return {"status": "fail", "message": "Lawyer not found"}
-
     poa = frappe.new_doc("Power of Attornies")
     poa.client = customer.name
-    poa.lawyer = lawyer
     poa.attonery_number__najiz = najiz_number
     poa.expiry_date = expiry_date
     poa.attorney_content = doc_content
     poa.save(ignore_permissions=True)
+
+    frappe.db.set_value(
+        "Account Status Page", account_spage[0].name, "power_of_attorny", poa.name
+    )
+    frappe.db.set_value(
+        "Account Status Page", account_spage[0].name, "poa_expiry_date", poa.expiry_date
+    )
 
     client_transactions = frappe.get_all(
         "Client Transaction",
@@ -59,7 +63,6 @@ def create_power_of_attorny(**kwargs):
     return {
         "status": "success",
         "client": customer.name,
-        "lawyer": lawyer,
         "attonery_number__najiz": najiz_number,
         "attorney_content": doc_content,
         "expiry_date": expiry_date,

@@ -2,6 +2,11 @@
 import SectionTitle from "./SectionTitle.vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
+import LinkeinWhite from "../assets/icons/l-w.svg";
+import TwitterWhite from "../assets/icons/x-w.svg";
+import FacebookWhite from "../assets/icons/f-w.svg";
+import InstagramWhite from "../assets/icons/i-w.svg";
+
 </script>
 
 <template>
@@ -17,7 +22,7 @@ const { t } = useI18n();
     >
       <div class="about-img lg:w-1/2">
         <img
-          class="w-full block rounded-t-2xl lg:rounded-2xl"
+          class="w-full h-full object-cover  block rounded-t-2xl lg:rounded-2xl"
           src="../assets/images/work-2.jpg"
           alt=""
         />
@@ -46,51 +51,53 @@ const { t } = useI18n();
           {{ $t("AboutSection.missionText") }}
         </p>
         <div class="social-links flex gap-4">
-          <a href="#">
+          <a href="https://www.facebook.com/share/18kYp9EtSC/?mibextid=wwXIfr">
             <img
               width="25"
               height="25"
-              src="https://img.icons8.com/ios/25/FFFFFF/facebook--v1.png"
+              :src="FacebookWhite"
               alt="facebook--v1"
             />
           </a>
-          <a href="#">
+          <a href="https://x.com/musanadasa">
             <img
               width="25"
               height="25"
-              src="https://img.icons8.com/ios/25/FFFFFF/twitterx--v1.png"
+              :src="TwitterWhite"
               alt="twitterx--v1"
             />
           </a>
-          <a href="#">
+          <a href="https://www.instagram.com/musanadasa/">
             <img
               width="25"
               height="25"
-              src="https://img.icons8.com/ios/25/FFFFFF/instagram-new--v1.png"
+              :src="InstagramWhite"
               alt="instagram-new--v1"
             />
           </a>
-          <a href="#">
+          <a href="https://www.linkedin.com/company/musanadahsa/">
             <img
               width="25"
               height="25"
-              src="https://img.icons8.com/ios/25/FFFFFF/snapchat--v1.png"
-              alt="snapchat--v1"
+              :src="LinkeinWhite"
+              alt="LinkedIn--v1"
             />
           </a>
         </div>
         <div class="about-cta flex gap-4 items-center">
-          <button
+          <a
             class="btn py-2 px-8 bg-primary border-primary text-white"
-            onclick="my_modal_2.showModal()"
+            href="https://portal.lsc-sa.net/dashboard"
           >
             {{ $t("AboutSection.requestService") }}
-          </button>
+        </a>
         </div>
       </div>
     </div>
   </section>
 </template>
+
+
 
 <style scoped>
 .social-links a {

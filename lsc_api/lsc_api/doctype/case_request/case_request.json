@@ -79,7 +79,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "case_title.client_name",
+   "fetch_from": "case_title.client",
    "fieldname": "customer_name",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -135,7 +135,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 00:08:39.303268",
+ "modified": "2024-12-24 11:54:00.838715",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Case Request",

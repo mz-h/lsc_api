@@ -12,7 +12,7 @@
  "fields": [
   {
    "fieldname": "link",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Link",
    "reqd": 1
@@ -29,7 +29,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-30 23:42:43.583637",
+ "modified": "2024-11-19 12:27:52.989864",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Fixed Comment Links",

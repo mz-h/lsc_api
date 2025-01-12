@@ -61,49 +61,61 @@ class CaseSessions(Document):
 
     def after_insert(self):
         try:
+            item = frappe.db.get_value("Client Transaction",{
+                "name": frappe.db.get_value("Case", {"name": self.case_name}, "client_transaction")
+            }, "item")
+            create_appointment_on = frappe.db.get_all("Create Appointment On", ["*"])
+
             # Fetch client details
             client = frappe.get_doc("Customer", self.client)
-
-            # Prepare employee appointment document
-            cur_employee = frappe.get_doc({
-                "doctype": "Employee Appointment",
-                "customer": self.client,
-                "customer_name": client.customer_name,
-                "employee": self.lawyer_name,  # dynamically selected employee
-                "appointment_type": self.employee_appointment_type,
-                "duration": frappe.db.get_value(
-                    "Employee Appointment Type",
-                    self.employee_appointment_type,
-                    "default_duration",
-                ),
-                "appointment_for": "Employee",
-                "appointment_date": self.session_date,
-                "appointment_time": self.session_time,
-                "case_session": self.name,
-                "custom_session_type": "Session",
-                "mode_of_payment": "",  # Potentially set dynamically
-                "paid_amount": "",  # Optionally set dynamically
-                "invoiced": 0,
-            })
-
-            # Insert employee appointment, bypassing permission checks
-            cur_employee.insert(ignore_permissions=True)
-
-            # Assign task to the employee if user_id is found
-            emp_user = frappe.db.get_value("Employee", self.lawyer_name, "user_id")
-            if emp_user:
-                cs = frappe.get_doc({
-                    "doctype": "ToDo",
-                    "allocated_to": emp_user,
-                    "reference_type": "Case Sessions",
-                    "reference_name": self.name,
-                    "description": "Case Sessions Employee Assignment.",
-                    "status": "Open",
-                    "assigned_by": frappe.session.user,
+            if item in [item.name for item in create_appointment_on]:
+                employee_appointment_type = None
+                
+                # Find the appropriate designation and appointment type based on the item
+                for cur_item in create_appointment_on:
+                    if item == cur_item.name:
+                        employee_appointment_type = cur_item.employee_appointment_type
+                                            
+                # Prepare employee appointment document
+                cur_employee = frappe.get_doc({
+                    "doctype": "Employee Appointment",
+                    "customer": self.client,
+                    "customer_name": client.customer_name,
+                    "employee": self.lawyer_name,  # dynamically selected employee
+                    "appointment_type": employee_appointment_type or self.employee_appointment_type,
+                    "duration": frappe.db.get_value(
+                        "Employee Appointment Type",
+                        employee_appointment_type or self.employee_appointment_type,
+                        "default_duration",
+                    ),
+                    "appointment_for": "Employee",
+                    "appointment_date": self.session_date,
+                    "appointment_time": self.session_time,
+                    "case_session": self.name,
+                    "custom_session_type": "Session",
+                    "mode_of_payment": "",  # Potentially set dynamically
+                    "paid_amount": "",  # Optionally set dynamically
+                    "invoiced": 0,
                 })
-                cs.insert(ignore_permissions=True)
-            else:
-                frappe.log_error(f"No user linked to employee {self.lawyer_name}", "Case Session Error")
+
+                # Insert employee appointment, bypassing permission checks
+                cur_employee.insert(ignore_permissions=True)
+
+                # Assign task to the employee if user_id is found
+                emp_user = frappe.db.get_value("Employee", self.lawyer_name, "user_id")
+                if emp_user:
+                    cs = frappe.get_doc({
+                        "doctype": "ToDo",
+                        "allocated_to": emp_user,
+                        "reference_type": "Case Sessions",
+                        "reference_name": self.name,
+                        "description": "Case Sessions Employee Assignment.",
+                        "status": "Open",
+                        "assigned_by": frappe.session.user,
+                    })
+                    cs.insert(ignore_permissions=True)
+                else:
+                    frappe.log_error(f"No user linked to employee {self.lawyer_name}", "Case Session Error")
 
         except frappe.DoesNotExistError as e:
             frappe.log_error(f"Error creating employee appointment: {str(e)} for Case Session {self.name}", "Case Session Error")

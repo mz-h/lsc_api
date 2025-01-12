@@ -1,7 +1,8 @@
 <template>
-  <LoggedInTopNav title="الطلبات" :backArrow="false" />
+  <LoggedInTopNav :title="t('Requests')" :backArrow="false" />
   <div
-    class="bg-white mx-4 rounded mt-24 lg:mt-40 lg:mr-auto lg:ml-auto lg:w-1/2"
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="bg-white mx-4 rounded mt-24 lg:mt-40 lg:mr-auto lg:ml-auto lg:w-1/2 mb:20"
   >
     <div class="typeOfService flex items-center justify-center py-1">
       <span
@@ -29,7 +30,8 @@
     <div class="byYear flex justify-between flex-grow">
       <select
         class="select select-bordered w-full select-xs select-ghost bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
-        id="month"
+        id="year"
+        v-model="selectedYear"
       >
         <option v-for="year in years" :value="year">
           {{ year }}
@@ -37,16 +39,25 @@
       </select>
     </div>
   </div>
-
-  <div v-if="availableRequests">
+  <Loader v-if="loadingCurrent || loadingPrevious" />
+  <div v-else-if="isError">there was an error: {{ error }}</div>
+  <div v-else>
     <div
-      class="openRequeust flex flex-col gap-4 mt-4 mb-4 overflow-y-scroll mx-4 lg:grid lg:grid-cols-3"
+      class="openRequeust flex flex-col gap-4 mt-4 mb-20 overflow-y-scroll mx-4 lg:grid lg:grid-cols-3"
     >
       <div
         class="openReqCard flex flex-col gap-4 px-4 py-2 bg-white shadow-sm"
+        :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
         v-for="(request, ind) in availableRequests.filter((e) => {
-          if (selectedMonth) {
-            return e.creation.split(' ')[0].split('-')[1] == selectedMonth;
+          if (selectedYear || selectedMonth) {
+            const [year, month] = e.creation.split(' ')[0].split('-');
+            if (selectedMonth && !selectedYear) {
+              return month == selectedMonth;
+            } else if (selectedYear && !selectedMonth) {
+              return year == selectedYear;
+            } else if (selectedYear && selectedMonth) {
+              return month == selectedMonth && year == selectedYear;
+            }
           } else {
             return true;
           }
@@ -54,7 +65,17 @@
         :key="ind"
         @click="goToRequestDetails(request.name)"
       >
-        <h2 class="reqCardType text-black">{{ request.item }}</h2>
+        <h2 class="reqCardType text-center text-black">
+          {{ request.item }}
+        </h2>
+        <div class="flex justify-between w-full">
+          <h2 class="reqCardType text-black">{{ request.title }}</h2>
+          <h2 class="reqCardType text-black">
+            {{ $t("Request No.") }}
+
+            {{ request.name.split("-")[1] }}
+          </h2>
+        </div>
         <ul class="leading-8 flex justify-between">
           <li>
             <p class="text-sm text-wrap">
@@ -70,18 +91,23 @@
       </div>
     </div>
   </div>
-  <div v-else>لا يوجد طلبات</div>
-  <Loader v-if="loading" />
+  <!-- <div v-else>
+    {{ $t("No Requests") }}
+  </div> -->
   <BottomNav />
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import BottomNav from "@/components/BottomNav.vue";
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { useQuery } from "@tanstack/vue-query";
 
 const loading = ref(false);
 const navigate = useRouter();
@@ -90,58 +116,113 @@ const requestOptions = {
   headers: { Cookie: document.cookie },
   redirect: "follow",
 };
-const monthsNames = [
-  {
-    name: "يناير",
-    value: "01",
-  },
-  {
-    name: "فبراير",
-    value: "02",
-  },
-  {
-    name: "مارس",
-    value: "03",
-  },
-  {
-    name: "أبريل",
-    value: "04",
-  },
-  {
-    name: "مايو",
-    value: "05",
-  },
-  {
-    name: "يونيو",
-    value: "06",
-  },
-  {
-    name: "يوليو",
-    value: "07",
-  },
-  {
-    name: "أغسطس",
-    value: "08",
-  },
-  {
-    name: "سبتمبر",
-    value: "09",
-  },
-  {
-    name: "أكتوبر",
-    value: "10",
-  },
-  {
-    name: "نوفمبر",
-    value: "11",
-  },
-  {
-    name: "ديسمبر",
-    value: "12",
-  },
-];
+let monthsNames = [];
+if (locale.value == "en") {
+  monthsNames = [
+    {
+      name: "January",
+      value: "01",
+    },
+    {
+      name: "February",
+      value: "02",
+    },
+    {
+      name: "March",
+      value: "03",
+    },
+    {
+      name: "April",
+      value: "04",
+    },
+    {
+      name: "May",
+      value: "05",
+    },
+    {
+      name: "June",
+      value: "06",
+    },
+    {
+      name: "July",
+      value: "07",
+    },
+    {
+      name: "August",
+      value: "08",
+    },
+    {
+      name: "September",
+      value: "09",
+    },
+    {
+      name: "October",
+      value: "10",
+    },
+    {
+      name: "November",
+      value: "11",
+    },
+    {
+      name: "December",
+      value: "12",
+    },
+  ];
+} else {
+  monthsNames = [
+    {
+      name: "يناير",
+      value: "01",
+    },
+    {
+      name: "فبراير",
+      value: "02",
+    },
+    {
+      name: "مارس",
+      value: "03",
+    },
+    {
+      name: "أبريل",
+      value: "04",
+    },
+    {
+      name: "مايو",
+      value: "05",
+    },
+    {
+      name: "يونيو",
+      value: "06",
+    },
+    {
+      name: "يوليو",
+      value: "07",
+    },
+    {
+      name: "أغسطس",
+      value: "08",
+    },
+    {
+      name: "سبتمبر",
+      value: "09",
+    },
+    {
+      name: "أكتوبر",
+      value: "10",
+    },
+    {
+      name: "نوفمبر",
+      value: "11",
+    },
+    {
+      name: "ديسمبر",
+      value: "12",
+    },
+  ];
+}
 const selectedMonth = ref("");
-const years = ["2024"];
+const years = ["2024", "2025"];
+const selectedYear = ref("2024");
 
 fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .then((response) => {
@@ -153,91 +234,65 @@ fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .then()
   .catch(() => navigate.replace("/"));
 
-const requests = ref(["حالياً", "سابقاً"]);
+const requests = ref([t("Currently"), t("Previously")]);
 const availableRequests = ref([]);
 const activeIndex = ref(0);
 
-// Fake data for fallback
-const fallbackCurrentRequests = [
-  {
-    type: "جلسة استشارة حضورية",
-    title: "استشارة حول تطوير البرمجيات",
-    date: "29 أغسطس 2024",
-  },
-  {
-    type: "جلسة استشارة عن بعد",
-    title: "استشارة في تصميم المواقع",
-    date: "28 أغسطس 2024",
-  },
-  {
-    type: "جلسة استشارة كتابية",
-    title: "تحليل بيانات السوق",
-    date: "27 أغسطس 2024",
-  },
-];
-const fallbackPreviousRequests = [
-  {
-    type: "جلسة استشارة مرئية",
-    title: "استشارة في إدارة المشاريع",
-    date: "23 يوليو 2024",
-  },
-  {
-    type: "جلسة استشارة حضورية",
-    title: "استشارة حول تطوير التطبيقات",
-    date: "15 يونيو 2024",
-  },
-  {
-    type: "جلسة استشارة عن بعد",
-    title: "استشارة في التسويق الرقمي",
-    date: "10 مايو 2024",
-  },
-];
-
 const router = useRouter(); // Initialize router
 
-const fetchRequests = async () => {
-  loading.value = true;
-  try {
-    let response;
-    if (activeIndex.value === 0) {
-      response = await axios.get(
-        "/api/method/lsc_api.lsc_api.get_current_requests.get_current_requests"
-      );
-      loading.value = false;
-      availableRequests.value =
-        response.data.message.requests || fallbackCurrentRequests;
-    } else {
-      response = await axios.get(
-        "/api/method/lsc_api.lsc_api.get_previous_requests.get_previous_requests"
-      );
-      loading.value = false;
-      availableRequests.value =
-        response.data.message.requests || fallbackPreviousRequests;
-    }
-  } catch (error) {
-    loading.value = false;
-    console.error("Failed to fetch requests:", error);
-    availableRequests.value =
-      activeIndex.value === 0
-        ? fallbackCurrentRequests
-        : fallbackPreviousRequests;
-  }
-};
+const fetchCurrentRequests = () =>
+  axios.get(
+    "/api/method/lsc_api.lsc_api.get_current_requests.get_current_requests"
+  );
+const fetchPreviousRequests = () =>
+  axios.get(
+    "/api/method/lsc_api.lsc_api.get_previous_requests.get_previous_requests"
+  );
+
+const {
+  data: currentRequests,
+  isLoading: loadingCurrent,
+  isError,
+  error,
+} = useQuery({
+  queryKey: ["currentRequests"],
+  queryFn: fetchCurrentRequests,
+  // enabled: activeIndex.value === 0,
+});
+
+const { data: previousRequests, isLoading: loadingPrevious } = useQuery({
+  queryKey: ["previousRequests"],
+  queryFn: fetchPreviousRequests,
+  // enabled: activeIndex.value === 1,
+});
 
 const setActive = (index) => {
   activeIndex.value = index;
-  fetchRequests();
+  localStorage.setItem("activeIndexR", activeIndex.value);
+
+  if (index === 0) {
+    availableRequests.value =
+      currentRequests?.value?.data?.message?.requests || [];
+  } else {
+    availableRequests.value =
+      previousRequests?.value?.data?.message?.requests || [];
+  }
 };
 
 const goToRequestDetails = (requestId) => {
   router.push({
-    path: `/requests/requestDetails`,
+    path: "/requests/requestDetails",
     query: { requestId: requestId },
   });
 };
 
 onMounted(() => {
-  fetchRequests();
+  setActive(parseInt(localStorage.getItem("activeIndexR")) || 0);
+  loading.value = true;
+  setTimeout(() => {
+    loading.value = false;
+    setActive(parseInt(localStorage.getItem("activeIndexR")) || 0);
+  }, 2000);
 });
 </script>
 

@@ -1,15 +1,20 @@
 import frappe
 from frappe import _
 import requests
-
+from requests.auth import HTTPBasicAuth
 from lsc_api.utils.error_handler import handle_error
 from lsc_api.utils.jwt import verify_jwt_middleware
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 
 @frappe.whitelist(methods=["GET"])
 def get_subscription_status():
     # Get the current authenticated user
     user = frappe.session.user
+    account_spage = frappe.get_all("Account Status Page", {"user": user}, "*")
+    account_status = frappe.db.get_value(
+        "Account Status Page", {"user": user}, "status"
+    )
 
     # Get customer
     customer = frappe.get_list(
@@ -57,7 +62,7 @@ def get_subscription_status():
         )
 
         allowed_services = [
-            r.service_name for r in subscription_plan.custom_allowed_services
+            _(r.service_name) for r in subscription_plan.custom_allowed_services
         ]
         remaining_hours = 0
         for r in subscription.custom_quota:
@@ -66,9 +71,9 @@ def get_subscription_status():
         return {
             "data": {
                 "subscription": {
-                    "subscription_plan": subscription_plan.name,
+                    "subscription_plan": _(subscription_plan.name),
                     "plan_fees": subscription_plan.cost,
-                    "status": subscription.status,
+                    "status": _(subscription.status),
                     "invoice_start_date": subscription.current_invoice_start,
                     "invoice_end_date": subscription.current_invoice_end,
                     "consultation_hrs": subscription_plan.custom_total_hrs,
@@ -81,14 +86,21 @@ def get_subscription_status():
                     "remaining_hours": remaining_hours,
                     "allowed_services": allowed_services,
                 }
-            }
+            },
+            "asp_status": account_status,
         }
 
-    return {"data": {"subscription": None}}
+    return {"data": {"subscription": None}, "asp_status": account_status}
 
 
 @frappe.whitelist(methods=["GET"])
 def get_subscriptions():
+    user = frappe.session.user
+    user_language = frappe.db.get_value("User", {"name": user}, "language")
+    account_spage = frappe.get_all("Account Status Page", {"user": user}, "*")
+    account_status = frappe.db.get_value(
+        "Account Status Page", {"user": user}, "status"
+    )
     try:
         params = frappe.local.request.args
         # Convert parameters to integers
@@ -106,19 +118,8 @@ def get_subscriptions():
         # Fetch the list of subscription plans with their allowed services
         plans = frappe.get_all(
             "Subscription Plan",
-            fields=[
-                "name",
-                "plan_name",
-                "currency",
-                "cost",
-                "billing_interval",
-                "billing_interval_count",
-                "cost_center",
-                "custom_total_hrs",
-                "custom_total_hrs_cases",
-                "custom_total_hrs_legal_services",
-                "custom_total_plan_hrs",
-            ],
+            {"disabled": 0},
+            "*",
             order_by="cost desc",
             # limit_start=limit_start,
             # limit_page_length=size,
@@ -126,14 +127,30 @@ def get_subscriptions():
 
         # For each plan, fetch the associated allowed services
         for plan in plans:
+            plan["plan_name"] = _(plan["plan_name"])
+            plan["currency"] = _(plan["currency"])
+            plan["billing_interval"] = _(plan["billing_interval"])
+
             plan_items = frappe.get_all(
                 "Allowed Service",
                 fields=["service_name"],
                 filters={"parent": plan["name"]},
             )
+            for item in plan_items:
+                item["service_name"] = _(item["service_name"])
             plan["allowed_services"] = plan_items
 
-        return {"message": "success", "length": len(plans), "data": plans}
+            if user_language == "en":
+                plan["plan_requiries"] = plan["custom_plan_requiries_in_english"]
+            else:
+                plan["plan_requiries"] = plan["custom_plan_requiries"]
+
+        return {
+            "message": "success",
+            "length": len(plans),
+            "data": plans,
+            "asp_status": account_status,
+        }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Error fetching subscription plans"))
@@ -232,9 +249,19 @@ def create_subscription(**kwargs):
 
 @frappe.whitelist(methods=["POST"])
 def pay_subscription(**kwargs):
+    base_host = frappe.request.host
     try:
+        payment_settings = frappe.get_doc("Payment Settings")
+        secret_key = None
+        if payment_settings.use_live:
+            secret_key = payment_settings.live_secret_key
+        else:
+            secret_key = payment_settings.test_secret_key
+
         # Get the current authenticated user
         user = frappe.session.user
+        user_lang = frappe.db.get_value("User", user, "language")
+        
         user_data = frappe.get_all(
             "User",
             filters={"name": user},
@@ -245,10 +272,13 @@ def pay_subscription(**kwargs):
             return {"status": "fail", "message": "User not found"}
         user_data = user_data[0]
 
-        # Get data from kwargs
+        # Extract data from kwargs
         data = kwargs.get("data")
         sales_invoice = data.get("sales_invoice")
-        save_card = data.get("save_card")
+
+        # Retrieve the invoice and customer details
+        invoice = frappe.get_doc("Sales Invoice", sales_invoice)
+        customer = frappe.get_doc("Customer", invoice.customer)
 
         if not sales_invoice:
             return {"status": "fail", "message": "Sales invoice not provided"}
@@ -284,67 +314,71 @@ def pay_subscription(**kwargs):
             subscription_plan = subscription_plan[0]
 
             # Payment API request
-            url = "https://api.tap.company/v2/charges"
+            url = "https://api.moyasar.com/v1/invoices"
             headers = {
-                "Authorization": "Bearer sk_test_HZRGImxq8Euzi1b4h2AB7Kks",
                 "Content-Type": "application/json",
             }
 
+            # payer_ip = (
+            #     frappe.local.request.headers.get("X-Forwarded-For")
+            #     or frappe.local.request.remote_addr
+            # )
+
+            # Prepare payment data
             payment_data = {
-                "amount": subscription_plan.cost,
-                "currency": subscription_plan.currency,  # or the currency you're using
-                "customer_initiated": True,
-                "threeDSecure": True,
-                "save_card": False,
-                # "save_card": True,
-                # "save_card": save_card if save_card else False,
                 "description": subscription_plan.name,
-                "receipt": {
-                    "email": True,
-                    "sms": True,
-                },
+                "amount": int(subscription_plan.cost * 100),
+                "currency": subscription_plan.currency,
+                # "fee": "0",
+                # "refunded": "0",
+                # "captured": "0",
+                # "ip": payer_ip,
                 "metadata": {
+                    "user": user,
                     "sales_invoice": sales_invoice,
-                    "custom_status": "pending_payment",  # Custom metadata passed to redirect URL
+                    "custom_status": "pending_payment",
+                    "customer": {
+                        "first_name": user_data.get("first_name"),
+                        "middle_name": user_data.get(
+                            "middle_name", user_data.get("first_name")
+                        ),
+                        "last_name": user_data.get("last_name"),
+                        "email": user,
+                        "phone": {"number": user_data.get("phone")},
+                    },
                 },
-                "customer": {
-                    "first_name": user_data.get("first_name"),
-                    "middle_name": user_data.get(
-                        "middle_name", user_data.get("first_name")
-                    ),
-                    "last_name": user_data.get("last_name"),
-                    "email": user,
-                    "phone": {"number": user_data.get("phone")},
-                },
-                "source": {
-                    "id": "src_all"  # Indicate that all sources (like cards) are allowed
-                },
-                "post": {
-                    "url": "https://lsc.psc-s.com/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.tap_handler"
-                },
-                "redirect": {
-                    "url": "https://lsc.psc-s.com/dashboard/profile/payRes"  # Redirect URL after payment completion
-                },
+                # "source": {"id": "src_all"},  # Allow all sources
+                "callback_url": f"https://{base_host}/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.tap_handler",
+                "success_url": f"https://{base_host}/dashboard/profile/payRes",
             }
 
             try:
                 # Make the payment request
-                response = requests.post(url, headers=headers, json=payment_data)
+                response = requests.post(
+                    url,
+                    headers=headers,
+                    json=payment_data,
+                    auth=(secret_key, ""),
+                )
+
                 # response.raise_for_status()  # Raise exception for HTTP errors
                 response_data = response.json()
+                if user_lang == "ar":
+                    response_data["url"] = modify_lang_in_url(response_data["url"], user_lang)
 
                 # Update the subscription with the tap charge ID
                 subscription.custom_tap_charge_id = response_data["id"]
                 subscription.save(ignore_permissions=True)
-
                 return {
                     "status": "success",
+                    "response": response_data,
                     "CALLER": "OMAR",
-                    "data": {"transaction": response_data["transaction"]},
+                    "data": {"transaction": response_data["url"]},
                 }
             except:
                 return {
                     "status": "fail",
+                    "response": response_data,
                     "message": "Fail to create checkout url",
                 }
 
@@ -367,27 +401,28 @@ def pay_subscription(**kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def tap_handler(**kwargs):
+    base_host = frappe.request.host
     try:
         frappe.set_user("Administrator")
-
         data = frappe.request.json
-        frappe.log_error(frappe.as_json(data), "Tap Webhook Response")
+        frappe.log_error(frappe.as_json(data), "Moyasar Webhook Response")
         payment_status = data.get("status")
+        payment_id = data.get("payments")[0].get("id")
 
         sales_invoice_name = data.get("metadata").get("sales_invoice")
 
         if not sales_invoice_name:
-            frappe.log_error("No reference ID found in Tap webhook data")
+            frappe.log_error("No reference ID found in Moyasar webhook data")
             return
 
-        transaction = data.get("transaction", {})
-        transaction_amount = transaction.get("amount")
-
+        # transaction = data.get("transaction", {})
+        transaction_amount = data.get("amount")
+        transaction_amount = float(transaction_amount / 100)
         if not transaction_amount:
-            frappe.log_error("Transaction amount is missing")
+            frappe.log_error(transaction_amount, "Transaction amount is missing")
             return
 
-        if payment_status == "CAPTURED":
+        if payment_status == "paid":
             try:
                 sales_invoice = frappe.get_doc("Sales Invoice", sales_invoice_name)
             except frappe.DoesNotExistError:
@@ -425,7 +460,14 @@ def tap_handler(**kwargs):
                 "Subscription", {"custom_sales_invoice": sales_invoice.name}
             )
             subscription.status = "Active"
+            subscription.custom_moyasar_payment_id = payment_id
             subscription.save(ignore_permissions=True)
+
+            subscription_plan_id = subscription.plans[0]
+
+            subscription_plan = frappe.get_doc(
+                "Subscription Plan", subscription_plan_id.plan
+            )
 
             #  Cancel previous subscriptions
             customer_subscriptions = frappe.get_all(
@@ -445,123 +487,90 @@ def tap_handler(**kwargs):
                 old_subscription.status = "Cancelled"
                 old_subscription.save(ignore_permissions=True)
 
-            return {"status": "success", "redirect": "https://lsc.psc-s.com/success"}
-        elif payment_status == "FAILED":
+            # Cancel previous contracts
+            customer_contracts = frappe.get_all(
+                "Contract",
+                filters={
+                    "party_name": sales_invoice.customer,
+                },
+                fields=["name"],
+            )
+
+            for contract in customer_contracts:
+                frappe.db.set_value(
+                    "Contract", {"name": contract["name"]}, "status", "Inactive"
+                )
+            frappe.db.commit()
+
+            user = data.get("metadata").get("user")
+            account_spage = frappe.get_doc("Account Status Page", {"user": user})
+            account_spage.contract_status = None
+            account_spage.status = "Incomplete"
+            account_spage.save(ignore_permissions=True)
+
+            contract_template = frappe.get_all(
+                "Contract Template",
+                fields="name, contract_terms, custom_company_signature",
+            )
+            frappe.set_user(user)
+
+            if contract_template:
+                contract_data = dict(contract_template[0])
+
+                new_contract = frappe.get_doc(
+                    {
+                        "doctype": "Contract",
+                        "party_type": "Customer",
+                        "party_user": user,
+                        "party_name": sales_invoice.customer,
+                        "custom_subscription_plan": subscription_plan.name,
+                        "custom_subscription": subscription.name,
+                        "start_date": subscription.current_invoice_start,
+                        "end_date": subscription.current_invoice_end,
+                        "contract_template": contract_data["name"],
+                        "contract_terms": contract_data["contract_terms"],
+                        "signee_company": contract_data["custom_company_signature"],
+                    }
+                )
+
+                new_contract.insert(ignore_permissions=True)
+                new_contract.submit()
+                # frappe.log_error(str(user))
+
+                frappe.set_value(
+                    "Account Status Page",
+                    {"name": account_spage.name},
+                    "contract",
+                    new_contract.name,
+                )
+                frappe.db.commit()
+
+            else:
+                frappe.throw("No contract template found.")
+
+            return {
+                "status": "success",
+                "redirect": f"https//{base_host}/success",
+            }
+        elif payment_status == "canceled":
             frappe.log_error(f"Payment failed for Sales Invoice {sales_invoice_name}")
-            return {"status": "fail", "redirect": "https://lsc.psc-s.com/failure"}
+            return {"status": "fail", "redirect": f"https//{base_host}/failure"}
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Payment Initiation Failed"))
-        return {"status": "error", "redirect": "https://lsc.psc-s.com/failure"}
-
-    # data = frappe.request.json
-    # return data
-
-    # # Get the current authenticated user
-    # user = frappe.session.user
-
-    # customer = frappe.get_doc("Customer", {"custom_user": user})
-
-    # data = kwargs.get('data')
-    # sales_invoice = data.get('sales_invoice')
-
-    # # Check if the sales invoice exists and is not already submitted
-    # if frappe.db.exists("Sales Invoice", sales_invoice):
-    #     sales_invoice_doc = frappe.get_doc("Sales Invoice", sales_invoice)
-
-    #     if sales_invoice_doc.customer != customer.name:
-    #         return {"status": "fail", "message": "Forbidden"}
-
-    #     # Activate Subscription
-    #     if frappe.db.exists("Subscription", {"custom_sales_invoice": sales_invoice}):
-    #         subscription = frappe.get_doc("Subscription", {"custom_sales_invoice": sales_invoice})
-
-    #         url = f"https://api.tap.company/v2/charges/{subscription.custom_tap_charge_id}"
-    #         headers = {
-    #             "Authorization": "Bearer sk_test_6RfmheuSW2zlVtvBdOCUEM4c",
-    #             "Content-Type": "application/json"
-    #         }
-
-    #         response = requests.post(url, headers=headers, json=data)
-    #         response_data = response.json()
-
-    #         return response_data
-
-    #         if response_data['status'] == 'CAPTURED':
-
-    #             subscription.status = 'Active'
-    #             subscription.save()
-
-    #             if sales_invoice_doc.docstatus == 0:
-    #                 # Submit the Sales Invoice
-    #                 sales_invoice_doc.submit()
-
-    #             # Create Payment Entry for the Sales Invoice
-    #             payment_entry = frappe.new_doc("Payment Entry")
-    #             payment_entry.payment_type = "Receive"
-    #             payment_entry.party_type = "Customer"
-    #             payment_entry.party = sales_invoice_doc.customer
-    #             payment_entry.party_name = sales_invoice_doc.customer
-    #             payment_entry.posting_date = frappe.utils.nowdate()
-    #             # payment_entry.mode_of_payment = "Tap Payment"  # Replace with your mode of payment
-    #             payment_entry.paid_amount = sales_invoice_doc.outstanding_amount
-    #             payment_entry.paid_to = '1110 - النقدية في الخزينة - LSC'
-    #             payment_entry.paid_to_account_currency = sales_invoice_doc.currency
-    #             # payment_entry.received_amount = sales_invoice_doc.outstanding_amount
-    #             payment_entry.reference_no = "Tap_Payment_" + subscription.custom_tap_charge_id  # Replace with actual reference from Tap
-    #             payment_entry.reference_date = frappe.utils.nowdate()
-    #             payment_entry.append("references", {
-    #                 "reference_doctype": "Sales Invoice",
-    #                 "reference_name": sales_invoice_doc.name,
-    #                 "total_amount": sales_invoice_doc.grand_total,
-    #                 "outstanding_amount": sales_invoice_doc.outstanding_amount,
-    #                 "allocated_amount": sales_invoice_doc.outstanding_amount,
-    #             })
-
-    #             payment_entry.insert()
-    #             payment_entry.submit()
-
-    #             return {
-    #                 "status": "success",
-    #                 "message": f"Payment confirmed, Sales Invoice {sales_invoice} submitted, Payment Entry {payment_entry.name} created, and Subscription activated."
-    #             }
-
-    #         else:
-    #             return {
-    #                 "status": "fail",
-    #                 "message": "Failed Payment Process"
-    #             }
-    # else:
-    #     return {
-    #         "status": "fail",
-    #         "message": f"This sales invoice {sales_invoice} is not found."
-    #     }
+        return {"status": "error", "redirect": f"https//{base_host}/failure"}
 
 
-# @frappe.whitelist(allow_guest=True)
-# def initiate_subscription_and_redirect(customer_id, subscription_plan, payment_details):
-#     try:
-#         # Step 1: Validate the customer and subscription plan
-#         customer = frappe.get_doc("Customer", customer_id)
-#         plan = frappe.get_doc("Subscription Plan", subscription_plan)
+def modify_lang_in_url(url, user_lang):
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
 
-#         if not customer or not plan:
-#             frappe.throw(_("Invalid Customer or Subscription Plan"))
+    if user_lang == "ar":
+        query_params["lang"] = "ar"
+    else:
+        query_params.setdefault("lang", "en")  
 
-#         # Step 2: Initiate the payment process using Tap payment gateway
-#         payment_response = initiate_tap_payment(payment_details)
-
-#         if payment_response.get("status") != "INITIATED":
-#             frappe.throw(_("Payment initiation failed"))
-
-#         # Step 3: Redirect to the transaction URL
-#         transaction_url = payment_response.get("transaction", {}).get("url")
-#         if not transaction_url:
-#             frappe.throw(_("Transaction URL not found in the payment response"))
-
-#         # Perform the redirect
-#         frappe.local.response["type"] = "redirect"
-#         frappe.local.response["location"] = transaction_url
-
-#     except Exception as e:
-#         frappe.log_error(frappe.get_traceback(), _("Payment Initiation Failed"))
-#         frappe.throw(_("An error occurred: {0}").format(str(e)))
+    new_query = urlencode(query_params, doseq=True)
+    modified_url = urlunparse(
+        (parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, new_query, parsed_url.fragment)
+    )
+    return modified_url

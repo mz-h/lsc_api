@@ -1,6 +1,7 @@
 <template>
-  <LoggedInTopNav title="الباقات" :backArrow="true" />
+  <LoggedInTopNav :title="t('Packages')" :backArrow="true" />
   <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
     class="packs flex gap-4 overflow-x-scroll scrollbar-hide px-4 pt-24 justify-start mb-4 lg:justify-evenly"
   >
     <div
@@ -11,22 +12,30 @@
       <div
         class="packageDetailsCard flex flex-col gap-4 justify-center items-center bg-white w-full rounded py-4 px-4"
       >
-        <p class="text-primary">{{ pack.name }}</p>
+        <p class="text-primary">{{ pack.plan_name }}</p>
         <p class="price text-4xl text-black -mb-4 font-black">
           {{ pack.cost }}
         </p>
         <div class="flex items-end text-black gap-1">
           <p class="curr">
-            {{ pack.currency == "SAR" ? "ر.س" : pack.currency }}
+            {{ pack.currency }}
           </p>
           <p class="yearly">
             /
-            {{
-              pack.billing_interval == "Year" ? "سنوي" : pack.billing_interval
-            }}
+            {{ pack.billing_interval }}
           </p>
         </div>
-        <p class="text-xs">عدد الساعات المتاحة: {{ pack.custom_total_hrs }}</p>
+        <p class="text-xs">
+          {{ $t("Available Hours:") }}
+          {{ pack.custom_total_hrs }}
+        </p>
+        <div class="collapse collapse-arrow border-b-2 border-black text-black">
+          <input type="checkbox" />
+          <div class="collapse-title text-xl font-medium">
+            {{ $t("Package conditions") }}
+          </div>
+          <div class="collapse-content" v-html="pack.plan_requiries"></div>
+        </div>
       </div>
       <div
         class="title"
@@ -38,14 +47,19 @@
         </h2>
       </div>
       <button
-        :class="['btn', pack.plan_name == plan_name ? 'btn-success' : '']"
+        :class="[
+          'btn',
+          pack.plan_name == plan_name || pack.name == plan_name
+            ? 'btn-success'
+            : '',
+        ]"
         @click="
           () => {
-            handlePlanSelecting(pack.plan_name);
+            handlePlanSelecting(pack.name);
           }
         "
       >
-        اختيار هذه الباقة
+        {{ $t("Choose This Package") }}
       </button>
     </div>
   </div>
@@ -54,21 +68,24 @@
   >
     <RouterLink
       v-if="allowSend"
-      class="btn btn-primary max-w-64 w-full disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
+      class="btn btn-primary text-white border-white bg-primary max-w-64 w-full disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
       :to="{
         path: '/packages/paynow',
         query: { plan_name: plan_name },
       }"
     >
-      اشترك الان
+      {{ $t("Subscribe Now") }}
     </RouterLink>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
-import BottomNav from "@/components/BottomNav.vue";
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
+// import BottomNav from "@/components/BottomNav.vue";
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
 import { onMounted } from "vue";
@@ -79,6 +96,7 @@ const loading = ref(false);
 const navigate = useRouter();
 const plan_name = ref("");
 const allowSend = ref(false);
+const checkedd = ref(false);
 function handlePlanSelecting(pack) {
   plan_name.value = pack;
   allowSend.value = true;

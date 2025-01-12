@@ -9,6 +9,7 @@
   "case_information_section",
   "client_transaction",
   "client_transaction_status",
+  "branch",
   "case_study_title",
   "client",
   "lawyer_name",
@@ -24,6 +25,7 @@
   "juridical_costs",
   "recommendations",
   "proposed_fees",
+  "use_ai",
   "claim_parties_section",
   "table_wqnv",
   "section_break_nsdu",
@@ -158,12 +160,25 @@
    "fieldname": "client_transaction_status",
    "fieldtype": "Data",
    "label": "Client Transaction Status",
-   "options": "New\nIn Progress\nOn Hold\nDone\nCancelled"
+   "options": "New\nIn Progress\nOn Hold\nDone\nRefund\nCancelled"
+  },
+  {
+   "fetch_from": "client_transaction.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_ai",
+   "fieldtype": "Check",
+   "label": "Use AI"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-09-27 00:08:33.427199",
+ "modified": "2024-12-04 08:21:28.960946",
  "modified_by": "Administrator",
  "module": "Lsc Api",
  "name": "Cases Study",

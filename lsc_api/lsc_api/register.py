@@ -84,13 +84,18 @@ def register(**kwargs):
                 "username": username,
                 "mobile_no": mobile_no,
                 "enabled": 1,
-                "language": "en",
+                "language": "ar",
                 "send_welcome_email": 0,
                 # "time_zone": "Asia/Suadi",
             }
         )
         new_user.insert(ignore_permissions=True)
         new_user.add_roles("Customer")
+
+        frappe.db.set_value(
+            "Notification Settings", {"name": new_user.email}, "user", new_user.email
+        )
+        frappe.db.commit()
 
         # Set the password for the user
         update_password(new_user.email, password)
@@ -104,13 +109,21 @@ def register(**kwargs):
             {
                 "doctype": "Customer",
                 "custom_branch": branch,
-                "customer_name": username,
+                "customer_name": first_name,
                 "customer_type": "Individual",
                 "custom_user": new_user.name,
                 "custom_id_number": national_id,
             }
         )
         new_customer.insert(ignore_permissions=True)
+
+        new_account_status_page = frappe.get_doc(
+            {
+                "doctype": "Account Status Page",
+                "client": new_customer.name,
+            }
+        )
+        new_account_status_page.insert(ignore_permissions=True)
 
         return {
             "status": "success",

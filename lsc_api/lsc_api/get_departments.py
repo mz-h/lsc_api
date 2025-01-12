@@ -11,6 +11,11 @@ def get_departments():
     )
     try:
         user = frappe.session.user
+        account_spage = frappe.get_all("Account Status Page", {"user": user}, "*")
+        account_status = frappe.db.get_value(
+            "Account Status Page", {"user": user}, "status"
+        )
+
         departments = frappe.get_all(
             "Item Group", {"parent_item_group": "الأقسام"}, "name"
         )
@@ -56,18 +61,36 @@ def get_departments():
         for department in departments:
             department_name_translated = _(department["name"])
             items = frappe.get_all(
-                "Item", filters={"item_group": department.name}, fields=["name"]
+                "Item",
+                filters={"item_group": department.name},
+                fields=["name", "item_code", "custom_item_description"],
             )
 
-            items = [{"name": _(item["name"])} for item in items]
+            items = [
+                {
+                    "name": _(item["name"]),
+                    "custom_item_description": _(item["custom_item_description"]),
+                    "item_code": item["item_code"],
+                }
+                for item in items
+            ]
 
             department["name"] = department_name_translated
             department["details"] = [
-                {"name": item["name"], "hrs": service_hrs_map[item["name"]]}
+                {
+                    "name": item["name"],
+                    "hrs": service_hrs_map[item["name"]],
+                    "description": item["custom_item_description"],
+                    "item_code": item["item_code"],
+                }
                 for item in items
                 if item["name"] in service_hrs_map
             ]
-        return {"status": "success", "departments": departments}
+        return {
+            "status": "success",
+            "departments": departments,
+            "asp_status": account_status,
+        }
 
     except Exception as e:
         return {

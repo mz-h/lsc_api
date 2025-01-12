@@ -11,6 +11,7 @@ import RequestsView from "../views/RequestsView.vue";
 import ServicesView from "../views/ServicesView.vue";
 import PackagesView from "../views/PackagesView.vue";
 import Paynow from "../views/Paynow.vue";
+import Loading from "../views/Loading.vue";
 import NotificationsView from "../views/NotificationsView.vue";
 import StudyCaseView from "../views/StudyCaseView.vue";
 import CreateCaseView from "../views/CreateCaseView.vue";
@@ -21,9 +22,14 @@ import RequestDetails from "../views/RequestDetails.vue";
 import UserSettingsView from "../views/UserSettingsView.vue";
 import PowerofAttView from "../views/PowerofAttView.vue";
 import PrivacyPolicy from "../views/PrivacyPolicy.vue";
+import ContactUs from "../views/ContactUs.vue";
+import InquiriesPolicy from "../views/InquiriesPolicy.vue";
+import AccountStatusPage from "../views/AccountStatusPage.vue";
+import ReturnPolicy from "../views/ReturnPolicy.vue";
 import TermsView from "../views/TermsView.vue";
 import CurrentPackageView from "../views/CurrentPackageView.vue";
 import AnewPrint from "../views/AnewPrint.vue";
+import ForgetPassword from "../views/ForgetPassword.vue";
 
 const router = createRouter({
   base: "/dashboard/",
@@ -33,6 +39,11 @@ const router = createRouter({
       path: "/",
       name: "login",
       component: LoginView,
+    },
+    {
+      path: "/reset-password",
+      name: "reset-password",
+      component: ForgetPassword,
     },
     {
       path: "/signup",
@@ -50,9 +61,29 @@ const router = createRouter({
       component: PrivacyPolicy,
     },
     {
+      path: "/profile/contact",
+      name: "ContactUs",
+      component: ContactUs,
+    },
+    {
       path: "/profile/termsofuse",
       name: "TermsView",
       component: TermsView,
+    },
+    {
+      path: "/profile/InquiriesPolicy",
+      name: "InquiriesPolicy",
+      component: InquiriesPolicy,
+    },
+    {
+      path: "/profile/ReturnPolicy",
+      name: "ReturnPolicy",
+      component: ReturnPolicy,
+    },
+    {
+      path: "/profile/AccountStatusPage",
+      name: "AccountStatusPage",
+      component: AccountStatusPage,
     },
     {
       path: "/profile/residentialInfo",
@@ -125,6 +156,11 @@ const router = createRouter({
       component: Paynow,
     },
     {
+      path: "/loading",
+      name: "loading",
+      component: Loading,
+    },
+    {
       path: "/notifications",
       name: "Notifications",
       component: NotificationsView,
@@ -156,6 +192,23 @@ const router = createRouter({
       props: true,
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    // If navigating back, use the saved scroll position
+    if (savedPosition) {
+      return savedPosition;
+    }
+
+    // Only maintain scroll position for certain views (e.g., RequestsView, NotificationsView)
+    const routesToMaintainScroll = ["RequestsView", "Notifications"];
+
+    if (routesToMaintainScroll.includes(to.name)) {
+      // Prevent scrolling to the top
+      return false;
+    }
+
+    // For other routes, scroll to the top of the page
+    return { top: 0 };
+  },
 });
 
 export default router;

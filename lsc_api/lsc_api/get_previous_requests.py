@@ -19,7 +19,7 @@ def get_previous_requests():
             "Client Transaction",
             filters={
                 "client": customer.name,
-                "status": ["in", ["Done", "Cancelled"]],
+                "status": ["in", ["Done", "Cancelled", "Refund"]],
             },
             fields="name, client, status, item, transaction_type, description, creation",
         )
@@ -43,7 +43,11 @@ def get_previous_requests():
                         },
                         fields=["creation", "comment_type", "content", "owner"],
                     )
+                    request["title"] = case.case_name
+                    request["description"] = case.case_description
 
+                    for comment in comments:
+                        comment["content"] = _(comment["content"])
                     request["comments"] = comments
 
                 if frappe.db.exists(
@@ -60,7 +64,11 @@ def get_previous_requests():
                         },
                         fields=["creation", "comment_type", "content", "owner"],
                     )
+                    request["title"] = case_study.case_study_title
+                    request["description"] = case_study.case_description
 
+                    for comment in comments:
+                        comment["content"] = _(comment["content"])
                     request["comments"] = comments
 
                 if frappe.db.exists(
@@ -77,7 +85,11 @@ def get_previous_requests():
                         },
                         fields=["creation", "comment_type", "content", "owner"],
                     )
+                    request["title"] = legal_service.services_type
+                    request["description"] = legal_service.description
 
+                    for comment in comments:
+                        comment["content"] = _(comment["content"])
                     request["comments"] = comments
 
                 if frappe.db.exists(
@@ -95,6 +107,11 @@ def get_previous_requests():
                         fields=["creation", "comment_type", "content", "owner"],
                     )
 
+                    request["title"] = consultation.legal_advisor_title
+                    request["description"] = consultation.legal_advisor_description
+
+                    for comment in comments:
+                        comment["content"] = _(comment["content"])
                     request["comments"] = comments
 
             return {

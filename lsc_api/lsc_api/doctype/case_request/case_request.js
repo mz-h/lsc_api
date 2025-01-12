@@ -17,7 +17,7 @@ function fetch_and_display_claim_parties(frm) {
     frappe.call({
         method: 'frappe.client.get',
         args: {
-            doctype: 'Cases',
+            doctype: 'Case',
             name: frm.doc.case_title
         },
         callback: function(r) {

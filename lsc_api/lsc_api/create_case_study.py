@@ -65,5 +65,7 @@ def create_case_study(**kwargs):
     return {
         "status": "success",
         "title": case_study.case_study_title,
+        "client_transaction": case_study.client_transaction,
+        "creation": case_study.creation,
         "description": case_study.case_description,
     }

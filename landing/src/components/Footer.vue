@@ -1,7 +1,7 @@
 <template>
   <footer
     :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
-    class="footer border-t bg-base-200 text-base-content p-10 flex flex-col items-center lg:flex-row lg:justify-evenly"
+    class="footer border-t bg-[#fff9fc] text-base-content p-10 flex flex-col items-center lg:flex-row lg:justify-evenly"
   >
     <div
       class="about-foot text-center flex flex-col items-center lg:max-w-80 lg:items-start"
@@ -13,29 +13,33 @@
         {{ $t("Footer.supportCenter.description") }}
       </p>
       <div class="footer-social-icons flex gap-4 mt-2">
-        <a href="#">
-          <font-awesome-icon
-            icon="fa-brands fa-facebook-f"
+        <a href="https://x.com/musanadasa">
+          <img
             class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
+            :src="TwitterBlack"
+            alt="twitterx--v1"
           />
         </a>
-        <a href="#">
-          <font-awesome-icon
-            class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
-            icon="fa-brands fa-instagram"
-          />
+        <a href="https://www.linkedin.com/company/musanadahsa/">
+          <img
+          class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
+          :src="LinkedinBlack"
+          alt="LinkedIn--v1"
+        />
         </a>
-        <a href="#">
-          <font-awesome-icon
-            class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
-            icon="fa-brands fa-snapchat"
-          />
+        <a  href="https://www.facebook.com/share/18kYp9EtSC/?mibextid=wwXIfr">
+          <img
+          class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
+          :src="FacebookBlack"
+          alt="FacebookBlack"
+        />
         </a>
-        <a href="#">
-          <font-awesome-icon
-            class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
-            icon="fa-brands fa-x-twitter"
-          />
+        <a href="https://www.instagram.com/musanadasa/">
+          <img
+          class="w-8 h-8 flex items-center justify-center duration-300 hover:scale-105"
+          :src="InstagramBlack"
+          alt="InstagramBlack"
+        />
         </a>
       </div>
     </div>
@@ -58,7 +62,7 @@
           <span class="font-bold">جدة:</span>
           المكتب 416 - الطابق الرابع - مجمع عبد اللطيف بلازا، طريق الملك فهد
         </p> -->
-        <a href="tel:055 955 7313">055-955-7313</a>
+        <a href="tel:0508062958">050-806-2958</a>
         <a href="mailto:info@lsc-sa.net">info@lsc-sa.net</a>
       </div>
     </div>
@@ -78,9 +82,15 @@
       <a class="link link-hover" onclick="my_modal_1.showModal()">
         {{ $t("Footer.company.links.termsAndConditions") }}
       </a>
+      <a class="link link-hover" onclick="my_modal_11.showModal()">
+        {{ $t("Footer.company.links.inquiriesPolicy") }}
+      </a>
+      <a class="link link-hover" onclick="my_modal_12.showModal()">
+        {{ $t("Footer.company.links.returnPolicy") }}
+      </a>
     </div>
   </footer>
-  <footer class="footer ltr-footer bg-base-200">
+  <!-- <footer class="footer ltr-footer bg-base-200">
     <div
       class="footer lg:w-4/5 lg:place-self-center text-base-content border-base-300 border-t px-10 py-4"
     >
@@ -107,26 +117,27 @@
         </p>
       </aside>
       <nav class="md:place-self-center md:justify-self-end place-self-center">
-        <div class="grid grid-flow-col gap-4">
-          <a href="#">
+        <div class="flex row-reverse gap-4">
+          <a  href="https://x.com/musanadasa">
             <font-awesome-icon
               class="w-4 h-4 flex items-center justify-center duration-300 hover:scale-105"
-              icon="fa-brands fa-x-twitter"
+              icon="fa-brands fa-twitter"
             />
+            
           </a>
-          <a href="#">
+          <a href="https://www.linkedin.com/company/musanadahsa/">
             <font-awesome-icon
               class="w-4 h-4 flex items-center justify-center duration-300 hover:scale-105"
-              icon="fa-brands fa-snapchat"
+              icon="fa-brands fa-linkedin"
             />
           </a>
-          <a href="#">
+          <a  href="https://www.facebook.com/share/18kYp9EtSC/?mibextid=wwXIfr">
             <font-awesome-icon
               icon="fa-brands fa-facebook-f"
               class="w-4 h-4 flex items-center justify-center duration-300 hover:scale-105"
             />
           </a>
-          <a href="#">
+          <a href="https://www.instagram.com/musanadasa/">
             <font-awesome-icon
               class="w-4 h-4 flex items-center justify-center duration-300 hover:scale-105"
               icon="fa-brands fa-instagram"
@@ -135,27 +146,41 @@
         </div>
       </nav>
     </div>
-  </footer>
-  <footer class="lg:mb-0">
-    <div class="copyrights-f text-center bg-base-200 py-4">
-      <p>
-        &copy; Copyright LSC 2024. | Design by
-        <a href="#" class="text-emerald-600">WE</a>
+  </footer> -->
+  <footer class="lg:mb-0 bg-[#fff9fc]">
+    <div class="copyrights-f text-black text-center bg-[#fff9fc] py-4">
+      <p class="text-black">
+        &copy; Copyright LSC 2025. | Design by
+        <a href="https://www.facebook.com/share/18kYp9EtSC/?mibextid=wwXIfr" class="text-emerald-600">
+        Musanadah
+      </a>
       </p>
     </div>
   </footer>
 </template>
 
+
+
 <style scoped>
 .footer-title {
-  color: white;
+  color: rgb(11, 11, 11);
   opacity: 1;
 }
 .ltr-footer {
   direction: ltr;
 }
+footer:first-of-type{
+  *{
+    color: #0b0b0b !important;
+  }
+}
 </style>
 <script setup>
+import LinkedinBlack from "../assets/icons/l-b.svg";
+import TwitterBlack from "../assets/icons/x-b.svg";
+import FacebookBlack from "../assets/icons/f-b.svg";
+import InstagramBlack from "../assets/icons/i-b.svg";
+
 import SectionTitle from "./SectionTitle.vue";
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();

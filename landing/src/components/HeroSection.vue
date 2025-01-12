@@ -18,9 +18,9 @@
           </p>
         </div>
         <div class="btns flex flex-col gap-4 w-full lg:flex-row lg:gap-8">
-          <button
-            onclick="my_modal_2.showModal()"
-            class="btn bg-primary w-full lg:w-1/2 text-white border-primary border-4 hover:text-white hover:bg-primaryHover hover:border-primaryHover"
+          <a
+            href="https://portal.lsc-sa.net/dashboard/signup"
+            class="btn bg-primary w-1/2 lg:w-1/4 text-white border-primary border-4 hover:text-white hover:bg-primaryHover hover:border-primaryHover"
           >
             {{ $t("Signup") }}
             <img
@@ -29,7 +29,19 @@
               src="https://img.icons8.com/parakeet-line/24/FFFFFF/user.png"
               alt="user"
             />
-          </button>
+          </a>
+          <a
+            href="https://portal.lsc-sa.net/dashboard/"
+            class="btn bg-primary w-1/2 lg:w-1/4 text-white border-primary border-4 hover:text-white hover:bg-primaryHover hover:border-primaryHover"
+          >
+            {{ $t("Early Register") }}
+            <img
+              width="24"
+              height="24"
+              src="https://img.icons8.com/parakeet-line/24/FFFFFF/user.png"
+              alt="user"
+            />
+          </a>
         </div>
         <div class="side-links hidden gap-4">
           <ul class="home-social-list">

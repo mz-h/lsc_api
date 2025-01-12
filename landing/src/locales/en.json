@@ -6,6 +6,7 @@
   "Services": "Services",
   "Reviews": "Reviews",
   "Signup": "Sign Up",
+  "Early Register": "Sign in",
   "Login": "Login",
   "Subscribe": "Subscribe Now",
   "Cookies": "Cookies Note",
@@ -69,6 +70,33 @@
       "content": "Programs and activities provided by the center to raise awareness among clients about the laws, rights, and legal obligations that affect their daily lives. This contributes to empowering clients to understand legal systems and contribute to achieving social justice through legal knowledge and awareness."
     }
   },
+  "Golden":{
+    "title": "Golden",
+    "price": "2699 SAR",
+    "consultations":"12 hours",
+    "personal": "3",
+    "labor": "3",
+     "personalCase": "Personal cases",
+      "labCase": "Labor cases"
+  },
+  "Silver":{
+    "title": "Silver",
+    "price": "1999 SAR",
+    "consultations":"6 hours",
+    "personal": "2",
+    "labor": "2",
+     "personalCase": "Personal cases",
+      "labCase": "Labor cases"
+  },
+  "Bronze":{
+    "title": "Bronze",
+    "price": "1249 SAR",
+    "consultations":"3 hours",
+    "personal": "1",
+    "labor": "1",
+     "personalCase": "Personal cases",
+      "labCase": "Labor cases"
+  },
   "PackagesSection": {
     "SafeLife": {
       "title": "Safe Life",
@@ -80,12 +108,14 @@
       "supp": "Support and Assistance",
       "famCase": "Family Cases",
       "languages": "Arabic",
-      "consultationHours": "20 hours",
-      "supportHours": "6 hours",
-      "familyCases": "4 cases"
+      "consultationHours": "10 hours",
+      "support_and_assistance": "6 hours",
+      "familyCases": "4 cases",
+      "Cas": "Cases",
+      "cases": "2 hours"
     },
-    "Profession": {
-      "name": "My Profession",
+    "General": {
+      "name": "General",
       "membership_type": "Annual",
       "target_category": "(Doctors / Nurses / Medical Technicians / Engineers / Saudis / Residents)",
       "lang": "Languages",
@@ -96,12 +126,12 @@
       "profCase": "professional cases",
       "languages": "Arabic",
       "consultations": "20 hours",
-      "support_and_assistance": "6 hours",
-      "labor_issues": "1 case",
-      "professional_issues": "1 case"
+      "support_and_assistance": "12 hours",
+      "Cas": "Cases",
+      "cases": "4 hours"
     },
-    "Reassured": {
-      "name": "Reassured",
+    "Relaxed": {
+      "name": "Relaxed",
       "membership_type": "Annual",
       "target_category": "Saudi workers in the private sector",
       "lang": "Languages",
@@ -111,9 +141,10 @@
       "labCase": "Labor cases",
       "profCase": "professional cases",
       "languages": "Arabic",
-      "consultations": "20 hours",
+      "consultations": "10 hours",
       "support_and_assistance": "6 hours",
-      "labor_issues": "1 case"
+      "Cas": "Cases",
+      "cases": "2 hours"
     },
     "safetyA": {
       "name": "My safety (A)",
@@ -206,7 +237,9 @@
         "about": "About Us",
         "packages": "Packages",
         "contact": "Contact Us",
-        "termsAndConditions": "Terms and Conditions"
+        "termsAndConditions": "Terms and Conditions",
+        "inquiriesPolicy": "Inquiries policy",
+        "returnPolicy": "Return Policy"
       }
     }
   }

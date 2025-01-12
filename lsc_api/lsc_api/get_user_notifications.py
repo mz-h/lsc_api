@@ -19,9 +19,12 @@ def get_user_notifications():
             "type",
             "document_type",
             "document_name",
-            "creation",  
+            "creation",
         ],
         order_by="creation desc",
     )
+
+    for notification in notifications:
+        notification["subject"] = _(notification["subject"])
 
     return notifications

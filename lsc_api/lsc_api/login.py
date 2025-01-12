@@ -24,22 +24,42 @@ def generate_keys(user):
 
 @frappe.whitelist(allow_guest=True)
 def login(**kwargs):
+    frappe.log_error(
+        f"LOGIN",
+        "LOGIN"
+    )
     try:
         data = kwargs.get("data")
 
         username = data.get("username")
         email = data.get("email")
         password = data.get("password")
-
+        
         # Make sure that username or email is required and password is required
         if not username and not email:
+            frappe.log_error(
+                f"LOGIN EMAIL",
+                "LOGIN"
+            )
             return handle_error("Email or username is required.")
 
         if not password:
+            frappe.log_error(
+                f"LOGIN PASS",
+                "LOGIN"
+            )
             return handle_error("Password is required.")
 
         # Check if the user exists or if the password is correct
         user = frappe.db.get_value("User", {"email": email}) if email else frappe.db.get_value("User", {"username": username})
+        frappe.log_error(
+                f"LOGIN USER",
+                "LOGIN"
+            )
+        if user:
+            user_doc = frappe.get_doc("User", user)
+            if not user_doc.enabled:
+                return {"status": "fail", "message": "This user is disabled."}
 
         try:
             login_manager = frappe.auth.LoginManager()
@@ -60,5 +80,5 @@ def login(**kwargs):
 
     except Exception as e:
         # return e
-        return {"status": "error", "message": e}
+        return {"status": "error", "message": f"{e}"}
 

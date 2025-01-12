@@ -6,6 +6,7 @@ import re
 
 @frappe.whitelist(methods=["POST"])
 def create_comment(**kwargs):
+
     try:
         user = frappe.session.user
 

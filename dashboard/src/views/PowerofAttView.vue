@@ -1,16 +1,84 @@
 <template>
-  <LoggedInTopNav title="التوكيلات" :backArrow="true" />
+  <LoggedInTopNav :title="t('Authorizations')" :backArrow="true" />
   <div class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24">
     <div
       class="card bg-white rounded-box flex-grow px-4 py-10 gap-10 shadow-md"
     >
+      <div v-if="subscriptionStat" class="ele text-black text-center">
+        <h1 class="font-bold">
+          {{ $t("Create an authorization via Najiz") }}
+        </h1>
+        <p>{{ $t("Representative Data") }}</p>
+        <ul>
+          <li>
+            {{ $t("Name") }}
+            :
+            <span @click="copyClip"> نايف بن داوود بن صالح العتيق </span>
+          </li>
+          <li>
+            {{ $t("ID Number") }}
+            :
+            <span @click="copyClip"> 1014288417 </span>
+          </li>
+          <li>
+            {{ $t("Date of Birth") }}
+            :
+            <span @click="copyClip"> 20/11/1396 </span>
+            -
+            <span @click="copyClip"> 12/11/1976 </span>
+          </li>
+          <li>
+            {{ $t("Phone Number") }}
+            :
+            <span @click="copyClip"> 0559957083 </span>
+          </li>
+          <li>
+            {{ $t("Representative") }}
+            :
+            {{ $t("Lawyer") }}
+          </li>
+          <li>
+            {{ $t("Follow the following instructions from Najiz") }}
+            <br />
+            <RouterLink
+              :to="{
+                path: '/profile/allInvoices/AnewPrint',
+                query: {
+                  invoice:
+                    'https://new.najiz.sa/applications/landing/e-services/3472d517-7cb4-4cd5-a6bc-2abc9751eea3',
+                },
+              }"
+              target="_blank"
+              class="text-primary text-center"
+            >
+              {{ $t("Here") }}
+            </RouterLink>
+            <span class="px-4">
+              {{ t("Or") }}
+            </span>
+            <RouterLink
+              :to="{
+                path: '/profile/allInvoices/AnewPrint',
+                query: {
+                  invoice:
+                    'https://www.youtube.com/embed/St3KeHU4xjs?si=MGHpJupVqBbLuriQ',
+                },
+              }"
+              target="_blank"
+              class="text-primary text-center"
+            >
+              {{ $t("Youtube") }}
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
       <!-- Form Start -->
       <button
-        class="btn btn-primary text-white w-full max-w-40 self-center"
+        class="btn btn-primary text-white border-white bg-primary text-white w-full max-w-40 self-center"
         @click.prevent="toggleDisable"
         :class="allowEdit ? 'bg-danger' : ''"
       >
-        {{ allowEdit ? "تراجع" : "تعديل" }}
+        {{ allowEdit ? $t("Undo") : $t("Edit") }}
       </button>
       <form @submit.prevent="handleSubmit" class="flex flex-col gap-6">
         <!-- Buttons for Save and Edit -->
@@ -19,13 +87,15 @@
           type="submit"
           :class="allowEdit ? '' : ' hidden'"
         >
-          حفظ التغييرات
+          {{ $t("Save Changes") }}
         </button>
         <div class="flex flex-col gap-4">
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">رقم توكيل ناجز</span>
+                <span class="label-text">
+                  {{ $t("Najiz Authorization Number") }}
+                </span>
               </div>
               <input
                 type="tel"
@@ -39,7 +109,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">تاريخ إنتهاء التوكيل</span>
+                <span class="label-text">
+                  {{ $t("Authorization Expiration Date") }}
+                </span>
               </div>
               <VueDatePicker
                 v-model="userData.expiry_date"
@@ -95,18 +167,30 @@
       <!-- Form End -->
     </div>
   </div>
+  <div v-if="showToast" class="relative">
+    <div class="toast bottom-20 left-1/2 -translate-x-1/2">
+      <div class="alert alert-info bg-white border-2 border-primary">
+        <span>{{ toastMessage }}</span>
+      </div>
+    </div>
+  </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+import showToastMessage from "../router/toastmessage";
+
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import id_face from "@/assets/images/id_front.png";
-
+const showToast = ref(false);
+const toastMessage = ref(null);
 const navigate = useRouter();
 const requestOptions = {
   method: "GET",
@@ -130,7 +214,6 @@ fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .catch(() => navigate.replace("/"));
 
 const userData = ref({
-  lawyer: "احمد الجاسم",
   attonery_number__najiz: "",
   expiry_date: "",
   file: [""],
@@ -142,6 +225,7 @@ const triggerFiletwo = () => {
 
 const toggleDisable = () => {
   allowEdit.value = !allowEdit.value;
+  if (!allowEdit.value) getAttorney();
 };
 
 const handleFileChangeback = (event) => {
@@ -169,10 +253,10 @@ const validateForm = () => {
     !userData.value.expiry_date ||
     !filetwo.value
   ) {
-    errorMessage.value = "جميع الحقول مطلوبة"; // Error message in Arabic
+    errorMessage.value = t("All fields are required"); // Error message in Arabic
     return false;
   } else if (userData.value.attonery_number__najiz.length != 9) {
-    errorMessage.value = "رقم التوكيل يجب ان يكون 9 ارقام";
+    errorMessage.value = t("Najiz Number Must be 9 numbers");
     return false;
   }
   errorMessage.value = "";
@@ -226,7 +310,7 @@ async function getAttorney() {
     );
     const data = await response.json();
     if (data.message.response == "There are no power of attornies") {
-      errorMessage.value = "لا يوجد أي توكيلات";
+      errorMessage.value = t("No Authorizations");
     } else {
       userData.value = data.message.response[0];
     }
@@ -236,8 +320,44 @@ async function getAttorney() {
     loading.value = false;
   }
 }
+const subscriptionStat = ref(false);
+async function subscriptionStatus() {
+  try {
+    const response = await fetch(
+      "/api/method/lsc_api.lsc_api.subscription_plan.subscription_plan.get_subscription_status"
+    );
+    const data = await response.json();
+    if (data.message.data.subscription) {
+      subscriptionStat.value = true;
+    } else {
+      subscriptionStat.value = false;
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function copyClip(event) {
+  const textToCopy = event.target.innerText;
+
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      showToastMessage(t("Copied to clipboard"), toastMessage, showToast);
+    })
+    .catch((err) => {
+      showToastMessage(
+        t("An unexpected error occurred. Please try again later."),
+        toastMessage,
+        showToast
+      );
+    });
+}
 
 onMounted(() => {
   getAttorney();
+  subscriptionStatus();
 });
 </script>

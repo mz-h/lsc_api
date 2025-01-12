@@ -1,6 +1,9 @@
 <template>
-  <LoggedInTopNav title="المعلومات الشخصية" :backArrow="true" />
-  <div class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24">
+  <LoggedInTopNav :title="t('Personal Information')" :backArrow="true" />
+  <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="flex flex-col sm:flex-row w-full px-6 gap-5 mt-24 lg:mt-40 pb-24"
+  >
     <div
       class="card article bg-white rounded-box flex-grow px-4 py-10 gap-10 shadow-md"
     >
@@ -68,7 +71,9 @@
 
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
-              <div class="label"><span class="label-text">الاسم</span></div>
+              <div class="label">
+                <span class="label-text">{{ $t("Name") }}</span>
+              </div>
               <input
                 type="text"
                 class="input input-bordered bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
@@ -80,13 +85,20 @@
 
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
-              <div class="label"><span class="label-text">الجنسية</span></div>
+              <div class="label">
+                <span class="label-text">
+                  {{ $t("Nationality") }}
+                </span>
+              </div>
               <select
                 class="select select-bordered w-full select-sm bg-gray-100 w-full text-black disabled:bg-gray-200 disabled:border-gray-200 disabled:text-black"
                 id="job"
                 :disabled="!allowEdit"
                 v-model="userData.custom_nationality"
               >
+                <option :value="userData.custom_nationality">
+                  {{ userData.custom_nationality }}
+                </option>
                 <option v-for="country in countries" :value="country.name">
                   {{ country.country_name }}
                 </option>
@@ -97,7 +109,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">رقم الهوية</span>
+                <span class="label-text">
+                  {{ $t("ID Number") }}
+                </span>
               </div>
               <input
                 type="text"
@@ -112,7 +126,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">اسم الكفيل</span>
+                <span class="label-text">
+                  {{ $t("Sponsor Name") }}
+                </span>
               </div>
               <input
                 type="text"
@@ -126,7 +142,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">تاريخ الميلاد</span>
+                <span class="label-text">
+                  {{ $t("Date of Birth") }}
+                </span>
               </div>
               <VueDatePicker
                 v-model="userData.birth_date"
@@ -142,9 +160,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text"
-                  >تاريخ دخول المملكة العربية السعودية</span
-                >
+                <span class="label-text">
+                  {{ $t("Date of Entry to Saudi Arabia") }}
+                </span>
               </div>
               <VueDatePicker
                 :enable-time-picker="false"
@@ -160,7 +178,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">رقم جواز السفر</span>
+                <span class="label-text">
+                  {{ $t("Passport Number") }}
+                </span>
               </div>
               <input
                 type="tel"
@@ -174,7 +194,9 @@
           <div class="flex flex-col md:flex-row gap-4">
             <label class="form-control flex-1 font-bold">
               <div class="label">
-                <span class="label-text">العنوان الوطني</span>
+                <span class="label-text">
+                  {{ $t("National Address") }}
+                </span>
               </div>
               <input
                 type="text"
@@ -192,27 +214,30 @@
           type="submit"
           :class="allowEdit ? '' : ' hidden'"
         >
-          حفظ التغييرات
+          {{ $t("Save Changes") }}
         </button>
       </form>
       <button
-        class="btn btn-primary text-white w-full max-w-40 self-center"
+        class="btn btn-primary text-white border-white bg-primary text-white w-full max-w-40 self-center"
         @click.prevent="toggleDisable"
         :class="allowEdit ? 'bg-danger' : ''"
       >
-        {{ allowEdit ? "تراجع" : "تعديل" }}
+        {{ allowEdit ? $t("Undo") : $t("Edit") }}
       </button>
       <!-- Form End -->
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import Loader from "@/components/Loader.vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import { ref, onMounted } from "vue";
 import id_face from "@/assets/images/id_front.png";
 import { useRouter } from "vue-router";
@@ -246,16 +271,16 @@ fetch("/api/method/frappe.auth.get_logged_user", requestOptions)
   .catch(() => navigate.replace("/"));
 
 const userData = ref({
-  full_name: null,
-  birth_date: null,
-  location: null,
-  custom_id_number: null,
-  custom_passport_number: null,
-  custom_nationality: null,
-  custom_kafeel_name: null,
-  custom_ksa_entering_date: null,
-  custom_customer_ssn_photo_back: null,
-  custom_customer_ssn_photo: null,
+  full_name: "",
+  birth_date: "",
+  location: "",
+  custom_id_number: "",
+  custom_passport_number: "",
+  custom_nationality: "",
+  custom_kafeel_name: "",
+  custom_ksa_entering_date: "",
+  custom_customer_ssn_photo_back: "",
+  custom_customer_ssn_photo: "",
 });
 
 const allowEdit = ref(false);
@@ -338,6 +363,7 @@ const handleSubmit = async () => {
 
 function toggleDisable() {
   allowEdit.value = !allowEdit.value;
+  if (!allowEdit.value) getUserData();
 }
 
 const handleFileChangeback = (event) => {
@@ -366,7 +392,7 @@ function fetchCountries() {
     //   locale.value || "en"
     // }`,
     // { method: "GET" }
-    `/api/method/lsc_api.lsc_api.get_linked_data.get_countries?lang=${"ar"}`,
+    `/api/method/lsc_api.lsc_api.get_linked_data.get_countries?lang=${locale.value}`,
     { method: "GET" }
   )
     .then((response) => {

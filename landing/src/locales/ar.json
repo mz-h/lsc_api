@@ -6,6 +6,7 @@
   "Services": "خدماتنا",
   "Reviews": "آراء العملاء",
   "Signup": "التسجيل",
+  "Early Register": "تسجيل الدخول",
   "Login": "الدخول",
   "Subscribe": "اشترك الآن",
   "Cookies": "ملفات تعريف الارتباط",
@@ -69,6 +70,33 @@
       "content": "البرامج والانشطة التي يقدمها المركز بهدف توعية العملاء بالقوانين والحقوق والواجبات القانونية التي تؤثر على حياتهم اليومية. بما يسهم إلى تمكين العملاء من فهم الأنظمة القانونية والمساهمة في تحقيق العدالة الاجتماعية من خلال المعرفة والوعي القانوني."
     }
   },
+  "Golden":{
+    "title": "الذهبية",
+    "price": "2699 ريال",
+    "consultations":"12 ساعة",
+    "personal": "3",
+    "labor": "3",
+    "personalCase": "قضايا أحوال شخصية",
+    "labCase": "قضايا عمالية"
+  },
+  "Silver":{
+    "title": "الفضية",
+    "price": "1999 ريال",
+    "consultations":"6 ساعة",
+    "personal": "2",
+    "labor": "2",
+    "personalCase": "قضايا أحوال شخصية",
+    "labCase": "قضايا عمالية"
+  },
+  "Bronze":{
+    "title": "البرونزية",
+    "price": "1249 ريال",
+    "consultations":"3 ساعات",
+    "personal": "1",
+    "labor": "1",
+    "personalCase": "قضايا أحوال شخصية",
+    "labCase": "قضايا عمالية"
+  },
   "PackagesSection": {
     "SafeLife": {
       "title": "حياة آمنة",
@@ -82,10 +110,11 @@
       "famCase": "قضايا أسرية",
       "consultationHours": "20 ساعة",
       "supportHours": "6 ساعة",
+      "Cas": "قضايا",
       "familyCases": "4 قضايا"
     },
-    "Profession": {
-      "name": "مهنتي",
+    "General": {
+      "name": "شاملة",
       "membership_type": "سنوي",
       "target_category": "(الأطباء / الممرضين / الفنيين الطبيين / المهندسين / السعوديين / المقيمين)",
       "lang": "اللغات",
@@ -95,12 +124,12 @@
       "labCase": "قضايا العمل",
       "profCase": "القضايا المهنية",
       "languages": "العربية",
+      "Cas": "قضايا",
       "consultations": "20 ساعة",
-      "support_and_assistance": "6 ساعة",
-      "labor_issues": "قضية واحدة",
-      "professional_issues": "قضية واحدة"
+      "support_and_assistance": "12 ساعة",
+      "cases": "4 ساعة"
     },
-    "Reassured": {
+    "Relaxed": {
       "name": "مطمئن",
       "membership_type": "سنوي",
       "target_category": "العمال السعوديين في القطاع الخاص",
@@ -111,9 +140,10 @@
       "labCase": "قضايا العمل",
       "profCase": "القضايا المهنية",
       "languages": "العربية",
-      "consultations": "20 ساعة",
+      "consultations": "10 ساعة",
       "support_and_assistance": "6 ساعة",
-      "labor_issues": "قضية واحدة"
+      "Cas": "قضايا",
+      "cases": "2 ساعة"
     },
     "safetyA": {
       "name": "سلامتي (أ)",
@@ -206,7 +236,9 @@
         "about": "عنا",
         "packages": "الباقات",
         "contact": "تواصل معنا",
-        "termsAndConditions": "الشروط والأحكام"
+        "termsAndConditions": "الشروط والأحكام",
+        "inquiriesPolicy": "سياسة الاستفسارات",
+        "returnPolicy": "سياسة الاسترجاع"
       }
     }
   }

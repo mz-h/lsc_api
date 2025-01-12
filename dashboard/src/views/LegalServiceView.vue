@@ -1,7 +1,10 @@
 <template>
-  <LoggedInTopNav :title="servName" :backArrow="true" />
+  <LoggedInTopNav :title="servTitle" :backArrow="true" />
 
-  <div class="w-full h-screen flex items-center justify-center p-8 bg-gray-100">
+  <div
+    :dir="$i18n.locale == 'ar' ? 'rtl' : 'ltr'"
+    class="w-full h-screen flex items-center justify-center p-8 bg-gray-100"
+  >
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
       <form @submit.prevent="handleSubmit" class="space-y-4">
         <label class="form-control w-full">
@@ -9,8 +12,8 @@
             class="select select-bordered w-full bg-white px-8"
             v-model="selectedType"
           >
-            <option v-for="type in legalTypes" :key="type" :value="type">
-              {{ type }}
+            <option v-for="type in legalTypes" :key="type" :value="type.name">
+              {{ type.legla_service_name }}
             </option>
           </select>
         </label>
@@ -19,7 +22,7 @@
           <textarea
             v-model="case_description"
             class="textarea textarea-bordered bg-white h-24 w-full"
-            placeholder="التفاصيل"
+            :placeholder="t('Details')"
           ></textarea>
         </label>
         <label
@@ -33,10 +36,10 @@
             />
             <font-awesome-icon v-else icon="fa-solid fa-circle-check" />
             <span class="font-semibold">
-              {{ changeIcon ? "تم إرفاق الملف" : "اضغط هنا للإرفاق" }}
+              {{ changeIcon ? $t("File Attached") : $t("Attach File") }}
             </span>
             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {{ changeIcon ? upFile : " صور أو ملفات أو وسائط" }}
+              {{ changeIcon ? upFile : $t("Images, Pdfs or Sounds") }}
             </p>
           </div>
           <input
@@ -48,7 +51,12 @@
           />
         </label>
 
-        <button type="submit" class="btn btn-primary w-full">إرسال</button>
+        <button
+          type="submit"
+          class="btn btn-primary text-white border-white bg-primary w-full"
+        >
+          {{ $t("Send") }}
+        </button>
       </form>
 
       <div v-if="message" class="mt-4 p-4" :class="messageClass">
@@ -57,18 +65,22 @@
     </div>
   </div>
   <Loader v-if="loading" />
-  <BottomNav />
+  <!-- <BottomNav /> -->
 </template>
 
 <script setup>
+import { useI18n } from "vue-i18n";
+const { t, locale } = useI18n();
+
 import { ref } from "vue";
 import LoggedInTopNav from "../components/LoggedInTopNav.vue";
-import BottomNav from "@/components/BottomNav.vue";
+// import BottomNav from "@/components/BottomNav.vue";
 import Loader from "@/components/Loader.vue";
 import axios from "axios";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { onMounted } from "vue";
 
+const router = useRouter();
 const upFile = ref(null);
 const changeIcon = ref(false);
 const handleFileChange = (event) => {
@@ -85,6 +97,8 @@ const message = ref("");
 const messageClass = ref("");
 const route = useRoute();
 const servName = route.query.elemnt || "";
+const servTitle = route.query.elementName || "";
+
 const legalTypes = ref([]);
 const selectedType = ref("");
 
@@ -96,7 +110,7 @@ function getTypes() {
       if (response.data.message.status === "success") {
         legalTypes.value = response.data.message.legal_types;
       } else {
-        message.value = "حدث خطأ";
+        message.value = t("An error occurred while booking");
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
       }
     });
@@ -106,14 +120,16 @@ function getTypes() {
 const handleSubmit = () => {
   // Validation: Check if case description is empty or too short
   if (case_description.value.length < 5) {
-    message.value = "الرجاء إدخال تفاصيل الخدمة (على الأقل 5 أحرف)";
+    message.value = t(
+      "Details are required and must be at least 5 characters long."
+    );
     messageClass.value = "bg-red-100 text-red-800 border border-red-300";
     return; // Stop the form submission if validation fails
   }
 
   // Validation: Check if a legal type is selected
   if (!selectedType.value) {
-    message.value = "الرجاء اختيار نوع الخدمة";
+    message.value = t("Please Select Service Type");
     messageClass.value = "bg-red-100 text-red-800 border border-red-300";
     return; // Stop the form submission if validation fails
   }
@@ -137,23 +153,37 @@ const handleSubmit = () => {
       loading.value = false;
       const data = response.data;
       if (data.message.status === "success") {
-        message.value = "تم الحجز بنجاح";
+        message.value = t("Successfully Booked");
         messageClass.value =
           "bg-green-100 text-green-800 border border-green-300";
+        setTimeout(() => {
+          router.push({
+            path: `/requests/requestDetails/`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 500);
       } else {
-        message.value = "حدث خطأ اثناء الحجز";
+        message.value = t("An error occurred while booking");
         messageClass.value = "bg-red-100 text-red-800 border border-red-300";
       }
     })
     .catch((error) => {
       loading.value = false;
       messageClass.value = "bg-red-100 text-red-800 border border-red-300";
-      if (error.response.data.exception.includes("hours quota")) {
-        message.value = "رصيد الساعات المتبقية غير كافي.";
+      if (error.response.data.exception.includes("hours")) {
+        message.value = t("Remaining hour balance is insufficient.");
+        setTimeout(() => {
+          router.push({
+            path: `/packages`,
+            query: { requestId: data.message.client_transaction },
+          });
+        }, 1500);
       } else if (error.response.data.exception.includes("expire_date")) {
-        message.value = "التوكيل المرفق غير صالح، برجاء مراجعة تاريخ التوكيل.";
+        message.value = t(
+          "The attached authorization is invalid, please check the authorization date."
+        );
       } else {
-        message.value = "حدث خطأ اثناء حجز الخدمة";
+        message.value = t("An error occurred while booking the service");
       }
     });
 };
